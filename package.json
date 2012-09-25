@@ -1,0 +1,7 @@
+{
+  "name":"webserver",
+  "author":"Joe Hitchens <joe@sleepless.com>",
+  "version":"1.0",
+  "description":"A webserver for delivering static files.",
+  "keywords": ["simple", "web", "server"],
+}

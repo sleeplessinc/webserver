@@ -13,7 +13,7 @@ http.createServer(function(req, res) {
     .addHeader('Expires', 300)
     .addHeader('X-PaperRoute', 'Node')
     .before(function() {
-      console.log(req.url);
+      //console.log(req.url);
     })
     .after(function(statCode) {
       log(statCode, req.url, ip);

@@ -1,7 +1,8 @@
 {
-  "name":"webserver",
-  "author":"Joe Hitchens <joe@sleepless.com>",
-  "version":"1.0",
-  "description":"A webserver for delivering static files.",
-  "keywords": ["simple", "web", "server"],
+	"name": "webserver",
+	"version": "1.0",
+	"description" : "Simple client-side code for displaying dynamic data",
+	"description": "A very simple webserver for delivering static files.",
+	"author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
+	"keywords": ["simple", "web", "server"],
 }

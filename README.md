@@ -11,6 +11,6 @@ This is a software development tool and not intended for real websites on the in
 
 ## Example
 
-npm install webserver
-node node_modules/webserver/webserver.js
+	npm install webserver
+	node node_modules/webserver/webserver.js
 

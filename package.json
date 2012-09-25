@@ -5,6 +5,6 @@
 	"author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
 	"keywords": ["simple", "web", "server"],
     "dependencies": {
-		"paperboy": "0.0.5",
+		"paperboy": "0.0.5"
 	}
 }

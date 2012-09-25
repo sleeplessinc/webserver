@@ -1,16 +1,18 @@
 # WebServer
 
-A simple, static webserver that will server files from the current working directory
-using Felix's paperboy module.
-
-Useful for when you need to quickly fire something up to deliver files via HTTP.
-
-## Purpose
-
-This is a software development tool and not intended for real websites on the internet.
-
-## Example
-
 	npm install webserver
 	node node_modules/webserver/webserver.js
+
+
+Delivers files
+with the HTTP protocol
+from the current working directory
+on port #8003
+using Felix's paperboy module.
+
+	http://localhost:8003/some_file_in_current_working_directory.txt
+
+## WARNING
+
+THIS IS A SOFTWARE DEVELOPMENT TOOL AND NOT INTENDED FOR REAL WEBSITES ON THE INTERNET.
 

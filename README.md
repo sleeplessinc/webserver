@@ -1,8 +1,8 @@
 # WebServer
 
+	npm install paperboy
 	npm install webserver
 	node node_modules/webserver/webserver.js
-
 
 Delivers files
 with the HTTP protocol

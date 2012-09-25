@@ -1,6 +1,6 @@
 {
 	"name": "webserver",
-	"version": "1.0",
+	"version": "1.0.0",
 	"description" : "Simple client-side code for displaying dynamic data",
 	"description": "A very simple webserver for delivering static files.",
 	"author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",

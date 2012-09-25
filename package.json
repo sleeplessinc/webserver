@@ -4,5 +4,5 @@
 	"description" : "Simple client-side code for displaying dynamic data",
 	"description": "A very simple webserver for delivering static files.",
 	"author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
-	"keywords": ["simple", "web", "server"],
+	"keywords": ["simple", "web", "server"]
 }

@@ -1,4 +1,16 @@
+
+
 # WebServer
+
+	npm install webserver
+
+## Usage
+
+	var webserver = require("webserver")
+	webserver.start();
+
+
+# Legacy
 
 	npm install paperboy
 	npm install webserver

@@ -1,33 +1,24 @@
 <html>
 <body>
-Thu May 25 17:34:28 PDT 2017
+Hi mom.
 
 <script src="sleepless.js"></script>
 <script src="jquery.js"></script>
-<script src="ws.js"></script>
+<script src="webserver.js"></script>
 <script>
 	
+var o = {foo: 0};
 
-var jqxhr = $.post( "/API", "rest", function(d) {
-	log( "success " + d);
-
-	var ws = new WS("/", function(o) {
-		log("ws msg from server: "+o2j(o));
-	},
-	function() {
-		log("ws disconnected");
-	},
-	function() {
-		log("ws connected");
-		ws.send({foo:7});
-	},
-	function(e) {
-		log("ws error: "+e);
-	});
-
-})
-.fail(function(e) {
-	log( "error " + e.statusText );
-})
+WS_connect = function(send) {
+	log("WS_connect ");
+	send(o, function(r) {
+		log("r="+o2j(r));
+	})
+};
+WS_disconnect = function() { log("WS_disconnect "); };
+WS_error = function(e) { log("WS_error "+e); };
+WS_message = function(o) {
+	log("WS_message "+o);
+};
 
 </script>

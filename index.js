@@ -6,6 +6,9 @@ var http = require("http");
 var https = require("https");
 
 var express = require("express");
+var bodyParser = require("body-parser");
+var multer = require("multer");
+var upload = multer();
 
 var sleepless = require("sleepless");
 
@@ -16,37 +19,66 @@ var seq = function() {
 	return global.SEQ_NUM;
 };
 
-var PORT_BASE = toInt(process.argv[2]);
-var PORT = PORT_BASE + 443;
-var PORT80 = PORT_BASE + 80;
-
 var clients = {};
 
 //	-	-	-	-	-	-	-	-	-	-	-	-	-	-
 
 var xapp = express();
 var server = null;
+
+var PORT = toInt(process.argv[2]) || 80;
+
 var SSL_KEY = null;
 var SSL_CERT = null;
+try {
 
-SSL_KEY = fs.readFileSync("ssl/privkey.pem", 'utf8');
-SSL_CERT = fs.readFileSync("ssl/fullchain.pem", 'utf8');
-log("SSL cert and key loaded");
-server = https.createServer({key:SSL_KEY, cert:SSL_CERT}, xapp);
-var xapp80 = express();
-xapp80.use("/", require('express-https-redirect')());
-xapp80.listen(PORT80, function() { log("HTTP redirector listening on "+PORT80); });
+	// try to load a cert & key ...
+	SSL_KEY = fs.readFileSync("ssl/privkey.pem", 'utf8');
+	SSL_CERT = fs.readFileSync("ssl/fullchain.pem", 'utf8');
+	log("SSL cert and key loaded");
 
+	// Suceses - so let's be secure!
+	server = https.createServer({key:SSL_KEY, cert:SSL_CERT}, xapp);
+
+	// set up a server on port 80 that simply redirects everything to 443
+	var rapp = express();
+	rapp.use("/", function(req, res, next) {
+		var u = 'https://' + req.hostname + req.originalUrl;
+		log("redirecting to "+u);
+		res.redirect(u);
+	});
+	rapp.listen(PORT, function() {
+		log("HTTP redirector listening on "+PORT);
+	});
+
+	PORT = 443;
+}
+catch(e) {
+	server = http.createServer(xapp);
+}
+
+
+// setup for websocket connections
 require('express-ws')(xapp, server);
-
-
-// static files
-xapp.use(express.static('site'));
-
-
-// websocket connections
 xapp.ws('/', function(ws, req) {
 	return ws_connect(ws, req)
+});
+
+xapp.use(function (req, res, next) {
+	log(req.method+" "+req.url);
+	return next();
+});
+
+// static files
+xapp.use("/", express.static('site'));
+
+xapp.use(bodyParser.json());
+xapp.user(bodyParser.urlencoded({extended:true}));
+
+xapp.post("/API", upload.array(), function(req, res, next) {
+	log("API POST");
+	log(req.body);
+	res.json(req.body);
 });
 
 

@@ -1,1 +1,21 @@
-Thu May 25 15:42:10 PDT 2017
+<html>
+<body>
+Thu May 25 17:34:28 PDT 2017
+
+<script src="sleepless.js"></script>
+<script src="jquery.js"></script>
+<script>
+	
+
+var jqxhr = $.post( "/API/foo", {foo:7}, function(d) {
+  log( "success " + d);
+})
+  .done(function() {
+  })
+  .fail(function(e) {
+    log( "error " + e.statusText );
+  })
+  .always(function() {
+  });
+
+</script>

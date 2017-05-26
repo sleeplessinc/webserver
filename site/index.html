@@ -4,18 +4,30 @@ Thu May 25 17:34:28 PDT 2017
 
 <script src="sleepless.js"></script>
 <script src="jquery.js"></script>
+<script src="ws.js"></script>
 <script>
 	
 
-var jqxhr = $.post( "/API/foo", {foo:7}, function(d) {
-  log( "success " + d);
+var jqxhr = $.post( "/API", "rest", function(d) {
+	log( "success " + d);
+
+	var ws = new WS("/", function(o) {
+		log("ws msg from server: "+o2j(o));
+	},
+	function() {
+		log("ws disconnected");
+	},
+	function() {
+		log("ws connected");
+		ws.send({foo:7});
+	},
+	function(e) {
+		log("ws error: "+e);
+	});
+
 })
-  .done(function() {
-  })
-  .fail(function(e) {
-    log( "error " + e.statusText );
-  })
-  .always(function() {
-  });
+.fail(function(e) {
+	log( "error " + e.statusText );
+})
 
 </script>

@@ -19,8 +19,6 @@ var seq = function() {
 	return global.SEQ_NUM;
 };
 
-var clients = {};
-
 //	-	-	-	-	-	-	-	-	-	-	-	-	-	-
 
 var xapp = express();
@@ -73,12 +71,14 @@ xapp.use(function (req, res, next) {
 xapp.use("/", express.static('site'));
 
 xapp.use(bodyParser.json());
-xapp.user(bodyParser.urlencoded({extended:true}));
+xapp.use(bodyParser.urlencoded({extended:true}));
+
 
 xapp.post("/API", upload.array(), function(req, res, next) {
 	log("API POST");
-	log(req.body);
-	res.json(req.body);
+	msg(req.body, function(r) {
+		res.json(r);
+	});
 });
 
 
@@ -92,103 +92,31 @@ server.listen(PORT, function() {
 
 var ws_connect = function(ws, req) {
 
-	var id = "U_"+seq();
-	
-	var seq = 0;
-	var new_msgid = function() {
-		seq += 1;
-		return "M_" + time() + "_" + seq;
-	}
+	log("ws connect "+o2j(ws));
 
+	ws.on('message', function(o) {
+		log("<--- "+0+" : "+o)
 
-	var client = {
-		id: id,
-		conn: ws,
-		send: function(o, replyid) {
-			var jacket = { 
-				msgid: new_msgid(),
-				replyid: replyid,
-				payload: o,
-			}
-			var json = o2j(jacket)
-			//log("---> TO "+id+" : "+json)
-			try {
-				ws.send(json)
-			} catch(e) {
-				log("** ERR ** "+e);
-			}
-		},
-	};
-
-	clients[id] = client;	// add the client to the clients hash
-
-	log(id+" connected");
-
-	ws.on('message', function(json) {
-		// incoming websocket message - arrives in json form
-		//log("<--- FROM "+id+" : "+json)
-
-		try {
-			// convert json to object
-			var jacket = j2o(json)
-			throwIf(!jacket, "bad json: "+json)
-			
-			// jacket should look like this:
-			//
-			//		{ msgid: "123", payload: { msg: "ping", ... } }
-			//
-			// if a reply is sent back, a similar jacket is
-			// sent back with msgid as replyid like this:
-			// 
-			//		{ replyid: "123", payload: { msg: "pong", ... } }
-
-			var msgid = jacket.msgid;
-			throwIf(!msgid, "bad msgid: "+msgid)
-
-			var payload = jacket.payload;
-			throwIf(!payload, "no data: "+payload)
-
-			// jacket checks out.  now handle msg payload
-
-			var msg = payload.msg;
-			throwIf(!msg, "msg is falsey")
-			throwIf(typeof msg !== "string", "msg invalid");
-
-			// lookup handler function
-			var fun = global["msg_"+msg]
-			throwIf(!fun, "no handler function");
-
-		} catch(e) {
-			log("MSG ERR: "+e);
-			return;
-		}
-
-		// send reply back to client as payload with a replyid jacket
-		var reply = function(err, data) {
-			client.send({ error: err, data: data, }, msgid)
-		}
-
-		// XXX ditch these two 
-		payload.error = reply
-		payload.reply = function(data) { reply(null, data) }	
-
-		// call the handler
-		fun(payload, client, reply)
+		msg(j2o(o), function(r) {
+			r = o2j(r);
+			log("---> "+0+" : "+r)
+			ws.send(r);
+		});
 
 	}); 
 
 	ws.on("close", function() {
-		// websocket connection lost
-		log(id+" disconnected")
-		delete clients[id];
+		log("ws disconnect")
 	});
 
 }
 
 //	-	-	-	-	-	-	-	-	-	-	-	-	-	-
 
-msg_ping = function(m, client) {
-	m.reply("pong");
-}
+msg = function(o, cb) {
+	o.foo += 1;
+	cb(o);
+};
+
 
 

@@ -9,9 +9,13 @@ Hi mom.
 	
 var o = {foo: 0};
 
-WS_disconnect = function() { log("WS_disconnect "); };
+WS_disconnect = function() {
+	log("WS_disconnect ");
+};
 
-WS_error = function(e) { log("WS_error "+e); };
+WS_error = function(e) {
+	log("WS_error "+e);
+};
 
 WS_message = function(o) {
 	log("WS_message "+(typeof o)+" ... " +o2j(o));

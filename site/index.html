@@ -15,8 +15,11 @@ WS_connect = function(send) {
 		log("r="+o2j(r));
 	})
 };
+
 WS_disconnect = function() { log("WS_disconnect "); };
+
 WS_error = function(e) { log("WS_error "+e); };
+
 WS_message = function(o) {
 	log("WS_message "+o);
 };

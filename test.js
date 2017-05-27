@@ -1,9 +1,12 @@
 
 
-sleepless = require("sleepless")
-webserver = require("./webserver.js")
+sleepless = require("sleepless");
+webserver = require("./webserver.js");
 
-// webserver.use("/butt", require("express").static('butt'));
+
+// webserver is an express app
+// webserver.use("/foo", require("express").static('foo'));
+
 
 // incoming messages (REST or WS)
 ws_api = function(o, cb) {

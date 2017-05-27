@@ -114,8 +114,6 @@
 		// browser
 		// ---------------------------------------------------
 
-		window["webserver"] = {};
-
 		var connect = function() {
 			var pr = document.location.protocol == "https:" ? "wss:" : "ws:";
 			var sock = new WebSocket(pr+"//"+window.location.host+"/");
@@ -125,7 +123,7 @@
 				}
 				setTimeout(connect, 2 * 1000);		// attempt to reconnect
 			});
-			webserver.send = function(data, cb, err_cb) {
+			send = function(data, cb, err_cb) {
 				var j = o2j(data);
 				if(j.length > 50000) {
 					// kinda big ... use REST
@@ -149,7 +147,7 @@
 			});
 			sock.addEventListener('open', function() {
 				if(typeof WS_connect === "function") {
-					WS_connect(webserver.send);
+					WS_connect(send);
 				}
 			})
 			sock.addEventListener('message', function(msg) {

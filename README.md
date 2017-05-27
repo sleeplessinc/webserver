@@ -6,9 +6,37 @@
 
 ## Usage
 
-	var webserver = require("webserver")
-	webserver.start();
+Server side:
 
+	webserver = require("./webserver.js");
+
+	// webserver is an express app
+	// webserver.use("/foo", require("express").static('foo'));
+
+	// must be defined; receives incoming messages from client (REST or WS)
+	ws_api = function(o, cb) {
+	}
+
+Client side uses the same webserver.js file:
+
+	<script src="jquery.js"></script>
+	<script src="webserver.js"></script>
+	<script>
+
+		WS_disconnect = function() { console.log("WS_disconnect "); };
+
+		WS_connect = function(send) {
+			console.log("WS_connect ");
+			send({ msg: "hello" }, WS_message, function(err) {
+				console.log("ERROR "+err);
+			});
+		};
+
+		WS_message = function(o) {
+			console.log("WS_message "+(typeof o)+" ... " +o2j(o));
+		};
+
+	</script>
 
 # Legacy
 

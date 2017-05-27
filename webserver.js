@@ -85,6 +85,7 @@ if(typeof process === "object") {
 
 	// REST interface to API
 	xapp.post("/API", upload.array(), function(req, res, next) {
+		log("...");
 		log("POST <-- "+o2j(req.body));
 		msg(req.body, function(r) {
 			log("POST --> "+o2j(req.body));
@@ -123,6 +124,7 @@ if(typeof process === "object") {
 
 	// incoming messages (REST or WS)
 	msg = function(o, cb) {
+		log((typeof o)+" ... "+o2j(o));
 		o.foo += 1;
 		cb(o);
 	};
@@ -158,23 +160,30 @@ else {
 		connect();
 	};
 
-	var send = function(o, cb) {
+	var send = function(o, cb, err_cb) {
 		var j = o2j(o);
-		if(j === null) {
+		if(j.length > 10000) {
 			// JSON.stringify failed - too big for websockets? send via REST
-			$.post( "/API", o, cb, "json" )
-			.fail(function(e) {
-				log( "xxx post error " + e.statusText );
-			})
+			$.ajax( "/API", {
+				method: "POST",
+				contentType: "application/json",
+				data: j,
+				success: function(o) {
+					cb(o);
+				},
+				error: err_cb,
+			});
 		}
 		else {
 			// send via websocket
-			ws.send(j, cb);
+			ws.send(o, cb);
 		}
 	};
 
 	var ws = new WS("/", function(o) {
-		if(typeof WS_message === "function") { WS_message(o); }
+		if(typeof WS_message === "function") {
+			WS_message(o);
+		}
 	},
 	function() {
 		if(typeof WS_disconnect === "function") { WS_disconnect(); }

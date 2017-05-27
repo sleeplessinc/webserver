@@ -66,11 +66,13 @@
 			log("WS CONNECT");
 			ws.on('message', function(o) {
 				log("WS <-- "+o)
-				ws_api(j2o(o), function(r) {
-					r = o2j(r);
-					log("WS --> "+r)
-					ws.send(r);
-				});
+				if(global["ws_api"]) {
+					ws_api(j2o(o), function(r) {
+						r = o2j(r);
+						log("WS --> "+r)
+						ws.send(r);
+					});
+				}
 			}); 
 			ws.on("close", function() {
 				log("WS DISCONNECT")
@@ -92,10 +94,12 @@
 		// REST interface to API
 		xapp.post("/API", upload.array(), function(req, res, next) {
 			log("POST <-- "+o2j(req.body));
-			ws_api(req.body, function(r) {
-				log("POST --> "+o2j(req.body));
-				res.json(r);
-			});
+			if(global["ws_api"]) {
+				ws_api(req.body, function(r) {
+					log("POST --> "+o2j(req.body));
+					res.json(r);
+				});
+			}
 		});
 
 

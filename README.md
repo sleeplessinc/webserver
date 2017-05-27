@@ -13,8 +13,9 @@ Server side:
 	// webserver is an express app
 	// webserver.use("/foo", require("express").static('foo'));
 
-	// must be defined; receives incoming messages from client (REST or WS)
+	// receives incoming messages from client (REST or WS)
 	ws_api = function(o, cb) {
+		...
 	}
 
 Client side uses the same webserver.js file:

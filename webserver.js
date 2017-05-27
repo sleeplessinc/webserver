@@ -12,7 +12,6 @@
 		var fs = require("fs");
 		var http = require("http");
 		var https = require("https");
-		var insp = function(o) { return require("util").inspect(o, false, 2) }
 
 		var express = require("express");
 		var bodyParser = require("body-parser");
@@ -21,10 +20,6 @@
 
 		var sleepless = require("sleepless");
 
-		/*var seq = function() {
-			global.SEQ_NUM = toInt(global.SEQ_NUM) + 1;
-			return global.SEQ_NUM;
-		};*/
 
 		var xapp = express();
 		var server = null;
@@ -48,7 +43,7 @@
 			var rapp = express();
 			rapp.use("/", function(req, res, next) {
 				var u = 'https://' + req.hostname + req.originalUrl;
-				log("redirecting to "+u);
+				//log("redirecting to "+u);
 				res.redirect(u);
 			});
 			rapp.listen(PORT, function() {
@@ -68,10 +63,21 @@
 		// setup for websocket connections
 		require('express-ws')(xapp, server);
 		xapp.ws('/', function(ws, req) {
-			return ws_connect(ws, req)
+			log("WS CONNECT");
+			ws.on('message', function(o) {
+				log("WS <-- "+o)
+				ws_api(j2o(o), function(r) {
+					r = o2j(r);
+					log("WS --> "+r)
+					ws.send(r);
+				});
+			}); 
+			ws.on("close", function() {
+				log("WS DISCONNECT")
+			});
 		});
 
-		// simple logger
+		// XXX dumb logger
 		xapp.use(function (req, res, next) {
 			log(req.method+" "+req.url);
 			return next();
@@ -83,11 +89,10 @@
 		xapp.use(bodyParser.json());
 		xapp.use(bodyParser.urlencoded({extended:true}));
 
-
 		// REST interface to API
 		xapp.post("/API", upload.array(), function(req, res, next) {
 			log("POST <-- "+o2j(req.body));
-			ws_message(req.body, function(r) {
+			ws_api(req.body, function(r) {
 				log("POST --> "+o2j(req.body));
 				res.json(r);
 			});
@@ -100,27 +105,6 @@
 		});
 
 
-		var ws_connect = function(ws, req) {
-
-			log("WS CONNECT"); //+insp(ws.req));
-
-			ws.on('message', function(o) {
-				log("WS <-- "+o)
-
-				ws_message(j2o(o), function(r) {
-					r = o2j(r);
-					log("WS --> "+r)
-					ws.send(r);
-				});
-
-			}); 
-
-			ws.on("close", function() {
-				log("WS DISCONNECT")
-			});
-
-		}
-
 		module.exports = xapp;
 
 	}
@@ -130,65 +114,53 @@
 		// browser
 		// ---------------------------------------------------
 
-		var WS = function(path, onmessage, onclose, onopen, onerror) {
-			var self = this;
-			var connect = function() {
-				var pr = document.location.protocol == "https:" ? "wss:" : "ws:";
-				
-				var s = new WebSocket(pr+"//"+window.location.host+path);
-				s.addEventListener('close', function (err) {
-					onclose(err);
-					setTimeout(connect, 2 * 1000);
-				});
-				self.send = function(data) {
-					return s.send(o2j(data))
-				};
-				s.addEventListener('error', onerror);
-				s.addEventListener('open', onopen)
-				s.addEventListener('message', function(msg) {
-					var data = j2o(msg.data)
-					onmessage(data, self)
-				});
-			}
-			connect();
-		};
+		window["webserver"] = {};
 
-		var send = function(o, cb, err_cb) {
-			var j = o2j(o);
-			if(j.length > 50000) {
-				// send via REST
-				$.ajax( "/API", {
-					method: "POST",
-					contentType: "application/json",
-					data: j,
-					success: function(o) {
-						cb(o);
-					},
-					error: err_cb,
-				});
-			}
-			else {
-				// send via websocket
-				ws.send(o, cb);
-			}
-		};
-
-		var ws = new WS("/", function(o) {
-			if(typeof WS_message === "function") {
-				WS_message(o);
-			}
-		},
-		function() {
-			if(typeof WS_disconnect === "function") { WS_disconnect(); }
-		},
-		function() {
-			if(typeof WS_connect === "function") { WS_connect(send); }
-		},
-		function(e) {
-			if(typeof WS_error === "function") { WS_error(e); }
-		});
+		var connect = function() {
+			var pr = document.location.protocol == "https:" ? "wss:" : "ws:";
+			var sock = new WebSocket(pr+"//"+window.location.host+"/");
+			sock.addEventListener('close', function() {
+				if(typeof WS_disconnect === "function") {
+					WS_disconnect();
+				}
+				setTimeout(connect, 2 * 1000);		// attempt to reconnect
+			});
+			webserver.send = function(data, cb, err_cb) {
+				var j = o2j(data);
+				if(j.length > 50000) {
+					// kinda big ... use REST
+					$.ajax( "/API", {
+						method: "POST",
+						contentType: "application/json",
+						data: j,
+						success: function(o, s, jx) { cb(o, s, jx); },	// response, status, jqXHR
+						error: function(jx, e, ex) { err_cb(e, ex); },	// err, stack (toss jqXHR)
+					});
+				}
+				else {
+					// use websocket
+					sock.send(o2j(data))
+				}
+			};
+			sock.addEventListener('error', function(err) {
+				if(typeof WS_error === "function") {
+					WS_error(e);
+				}
+			});
+			sock.addEventListener('open', function() {
+				if(typeof WS_connect === "function") {
+					WS_connect(webserver.send);
+				}
+			})
+			sock.addEventListener('message', function(msg) {
+				var data = j2o(msg.data)
+				if(typeof WS_message === "function") {
+					WS_message(data);
+				}
+			});
+		}
+		connect();
 
 	}
-
 
 })();

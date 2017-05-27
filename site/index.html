@@ -11,7 +11,9 @@ WS_disconnect = function(send) { log("WS_disconnect "); };
 
 WS_connect = function(send) {
 	log("WS_connect ");
-	send({ msg: "hello" }, WS_message);
+	webserver.send({ msg: "hello" }, WS_message, function(err) {
+		log("ERROR "+err);
+	});
 };
 
 WS_message = function(o) {

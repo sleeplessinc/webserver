@@ -7,23 +7,15 @@ Hi mom.
 <script src="webserver.js"></script>
 <script>
 	
-var o = {foo: 0};
+WS_disconnect = function(send) { log("WS_disconnect "); };
 
-WS_disconnect = function() {
-	log("WS_disconnect ");
-};
-
-WS_error = function(e) {
-	log("WS_error "+e);
+WS_connect = function(send) {
+	log("WS_connect ");
+	send({ msg: "hello" }, WS_message);
 };
 
 WS_message = function(o) {
 	log("WS_message "+(typeof o)+" ... " +o2j(o));
-};
-
-WS_connect = function(send) {
-	log("WS_connect ");
-	send(o, WS_message);
 };
 
 </script>

@@ -1,6 +1,6 @@
 {
   "name": "webserver",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "A very simple webserver for delivering static files.",
   "author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
   "keywords": [
@@ -18,7 +18,7 @@
     "paperboy": "0.0.5",
     "sleepless": "^2.4.7"
   },
-  "main": "index.js",
+  "main": "webserver.js",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

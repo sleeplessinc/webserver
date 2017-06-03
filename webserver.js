@@ -64,6 +64,7 @@
 		require('express-ws')(xapp, server);
 		xapp.ws('/', function(ws, req) {
 			log("WS CONNECT");
+			var client = {};
 			ws.on('message', function(o) {
 				log("WS <-- "+o)
 				if(global["ws_api"]) {
@@ -71,9 +72,9 @@
 						r = o2j(r);
 						log("WS --> "+r)
 						ws.send(r);
-					});
+					}, client);
 				}
-			}); 
+			});
 			ws.on("close", function() {
 				log("WS DISCONNECT")
 			});

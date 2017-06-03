@@ -80,10 +80,12 @@
 		});
 
 		// XXX dumb logger
+		/*
 		xapp.use(function (req, res, next) {
 			log(req.method+" "+req.url);
 			return next();
 		});
+		*/
 
 		// static files
 		xapp.use("/", express.static('site'));

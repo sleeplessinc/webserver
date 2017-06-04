@@ -230,7 +230,7 @@
 				}
 				else {
 					// use websocket
-					var rcbs = { cb: cb, cb_err: cb_err };	// make obj to hold reply callbacks
+					var rcbs = { cb: cb, err_cb: err_cb };	// make obj to hold reply callbacks
 					th.insert(rcbs, id, 10*1000);			// store obj in TimeHash with unique id for limited time
 					sock.send(j);	// send JSON encoded jacket and contents to server via websocket
 				}

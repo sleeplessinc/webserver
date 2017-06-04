@@ -63,19 +63,29 @@
 		// setup for websocket connections
 		require('express-ws')(xapp, server);
 		xapp.ws('/', function(ws, req) {
+			// new websocket connection from browser
 			log("WS CONNECT");
+
+			// create a connection-specific object that can hold session id's or whatever
+			// this gets passed into ws_api() along with each incoming message.
 			var client = {};
+
 			ws.on('message', function(o) {
+				// receive JSON encoded jacket and payload from browser
 				log("WS <-- "+o)
-				if(global["ws_api"]) {
-					ws_api(j2o(o), function(r) {
-						r = o2j(r);
+				if(global["ws_api"]) {		// see if we there is a ws_api() function to call
+					var jacket = j2o(o);	// decode JSON back into an object
+					ws_api(jacket.payload, function(r) {		// call the function with payload
+						// send response back to client
+						jacket.payload = r;		// replace payload with response (id is same)
+						r = o2j(r);				// JSON encode the jacket and contents
 						log("WS --> "+r)
-						ws.send(r);
+						ws.send(r);				// send it back to browser
 					}, client);
 				}
 			});
 			ws.on("close", function() {
+				// lost connection with browser
 				log("WS DISCONNECT")
 			});
 		});
@@ -121,6 +131,70 @@
 		// browser
 		// ---------------------------------------------------
 
+		var seq = 0;
+
+		var TimeHash = function(in_opts) {
+
+			var opts = {
+				scan_interval: 60 * 1000,
+			}
+			for(var k in in_opts) { if(in_opts[k]) opts[k] = in_opts[k] }
+
+			var mstime = function() { return new Date().getTime() }
+
+
+			var self = this;
+			var timer = null
+			var wraps = {}		// stores the msgs (inside a wrapper for tracking/expiration)
+			var num = 0			// # msgs waiting
+
+			// Remove and return a msg from the list given its id
+			var remove = self.remove = function(id) {
+				var p = null
+				var w = wraps[id]
+				if(w) {
+					p = w.payload
+					delete wraps[id]
+					num -= 1
+					if(num == 0) {
+						clearInterval(timer)
+						timer = null
+					}
+				}
+				return p
+			}
+
+
+			// Put a msg into the list
+			// ttl is in milliseconds and should not be less than 10,000 (default is 60,000 if not provided)
+			var insert = self.insert = function(p, id, ttl) {
+				var old = wraps[id];
+				var w = {
+					expire: mstime() + (ttl || (60 * 1000)),
+					payload: p,
+				}
+				wraps[id] = w;
+				if(old === undefined) {
+					num += 1
+				}
+				if(num == 1) {
+					timer = setInterval(function() {
+						var t = mstime()
+						for(var k in wraps) {
+							var w = wraps[k];
+							if(t >= w.expire) {
+								// it's expired ... toss it.
+								remove(k);
+							}
+						}
+					}, opts.scan_interval);
+				}
+				return old;
+			}
+
+		};
+		var th = new TimeHash();
+
 		var connect = function() {
 			var pr = document.location.protocol == "https:" ? "wss:" : "ws:";
 			var sock = new WebSocket(pr+"//"+window.location.host+"/");
@@ -131,20 +205,34 @@
 				setTimeout(connect, 2 * 1000);		// attempt to reconnect
 			});
 			send = function(data, cb, err_cb) {
-				var j = o2j(data);
+
+				// wrap the payload in a jacket that includes a unique id number
+				var id = seq += 1;
+				var jacket = {
+					id: id,
+					payload: data,
+				};
+				var j = o2j(jacket);		// JSON encode the jacket and contents
+
 				if(j.length > 50000) {
-					// kinda big ... use REST
+					// it's kinda big ... use REST rather than websocket
 					$.ajax( "/API", {
 						method: "POST",
 						contentType: "application/json",
 						data: j,
-						success: function(o, s, jx) { cb(o, s, jx); },	// response, status, jqXHR
-						error: function(jx, e, ex) { err_cb(e, ex); },	// err, stack (toss jqXHR)
+						success: function(o, s, jx) {
+							cb(o, s, jx);	// response, status, jqXHR
+						},
+						error: function(jx, e, ex) {
+							err_cb(e, ex);	// err, stack (toss jqXHR)
+						},
 					});
 				}
 				else {
 					// use websocket
-					sock.send(o2j(data))
+					var rcbs = { cb: cb, cb_err: cb_err };	// make obj to hold reply callbacks
+					th.insert(rcbs, id, 10*1000);			// store obj in TimeHash with unique id for limited time
+					sock.send(j);	// send JSON encoded jacket and contents to server via websocket
 				}
 			};
 			sock.addEventListener('error', function(err) {
@@ -158,12 +246,24 @@
 				}
 			})
 			sock.addEventListener('message', function(msg) {
-				var data = j2o(msg.data)
-				if(typeof WS_message === "function") {
-					WS_message(data);
+				// receive JSON encoded jacket from server
+				var jacket = j2o(msg.data);		// decode jacket back to object
+				// look for obj with jacket.id from TimeHash containing reply callbacks 
+				var rcbs = jacket.id ? th.remove(jacket.id) : null;
+				if(rcbs) {
+					// found; this is a reply to a client-sent message that was sent recently with jacket.id
+					// pass the response payload to the callback.
+					rcbs.cb(jacket.payload, null, null);
+				}
+				else {
+					// this msg originated at server; it's not a reply to a msg sent from browser
+					if(typeof WS_message === "function") {
+						WS_message(jacket.payload);
+						// Note: I currently don't support sending replies to server-originated msgs.
+					}
 				}
 			});
-		}
+		};
 		connect();
 
 	}

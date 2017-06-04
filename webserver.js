@@ -269,7 +269,9 @@
 				} 
 				else {
 					// unparseable or null message
-					WS_error("Unparseable or null message from server");
+					if(typeof WS_error === "function") {
+						WS_error("Unparseable or null message from server");
+					}
 				}
 			});
 		};

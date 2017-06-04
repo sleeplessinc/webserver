@@ -75,13 +75,18 @@
 				log("WS <-- "+o)
 				if(global["ws_api"]) {		// see if we there is a ws_api() function to call
 					var jacket = j2o(o);	// decode JSON back into an object
-					ws_api(jacket.payload, function(r) {		// call the function with payload
-						// send response back to client
-						jacket.payload = r;		// replace payload with response (id is same)
-						r = o2j(r);				// JSON encode the jacket and contents
-						log("WS --> "+r)
-						ws.send(r);				// send it back to browser
-					}, client);
+					if(jacket) {
+						ws_api(jacket.payload, function(r) {		// call the function with payload
+							// send response back to client
+							jacket.payload = r;		// replace payload with response (id is same)
+							r = o2j(jacket);			// JSON encode the jacket and contents
+							log("WS --> "+r)
+							ws.send(r);				// send it back to browser
+						}, client);
+					}
+					else {
+						log("WS Unparseable or null message from browser: "+o2j(o));
+					}
 				}
 			});
 			ws.on("close", function() {
@@ -230,7 +235,7 @@
 				}
 				else {
 					// use websocket
-					var rcbs = { cb: cb, err_cb: err_cb };	// make obj to hold reply callbacks
+					var rcbs = { cb:cb, err_cb:err_cb };	// make obj to hold reply callbacks
 					th.insert(rcbs, id, 10*1000);			// store obj in TimeHash with unique id for limited time
 					sock.send(j);	// send JSON encoded jacket and contents to server via websocket
 				}
@@ -270,7 +275,7 @@
 				else {
 					// unparseable or null message
 					if(typeof WS_error === "function") {
-						WS_error("Unparseable or null message from server");
+						WS_error("Unparseable or null message from server: "+o2j(msg.data));
 					}
 				}
 			});

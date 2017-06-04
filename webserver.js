@@ -72,7 +72,7 @@
 
 			ws.on('message', function(o) {
 				// receive JSON encoded jacket and payload from browser
-				log("WS <-- "+o)
+				log("WS <-- "+o.abbr(500))
 				if(global["ws_api"]) {		// see if we there is a ws_api() function to call
 					var jacket = j2o(o);	// decode JSON back into an object
 					if(jacket) {
@@ -80,7 +80,7 @@
 							// send response back to client
 							jacket.payload = r;		// replace payload with response (id is same)
 							r = o2j(jacket);			// JSON encode the jacket and contents
-							log("WS --> "+r)
+							log("WS --> "+r.abbr(500))
 							ws.send(r);				// send it back to browser
 						}, client);
 					}
@@ -106,15 +106,15 @@
 		// static files
 		xapp.use("/", express.static('site'));
 
-		xapp.use(bodyParser.json());
-		xapp.use(bodyParser.urlencoded({extended:true}));
+		xapp.use(bodyParser.json({limit:"50mb"}));
+		xapp.use(bodyParser.urlencoded({limit:"50mb", extended:true}));
 
 		// REST interface to API
 		xapp.post("/API", upload.array(), function(req, res, next) {
-			log("POST <-- "+o2j(req.body));
+			log("POST <-- "+o2j(req.body).abbr(500));
 			if(global["ws_api"]) {
-				ws_api(req.body, function(r) {
-					log("POST --> "+o2j(req.body));
+				ws_api(req.body.payload, function(r) {
+					log("POST --> "+o2j(req.body).abbr(500));
 					res.json(r);
 				});
 			}
@@ -219,7 +219,7 @@
 				};
 				var j = o2j(jacket);		// JSON encode the jacket and contents
 
-				if(j.length > 50000) {
+				if(j.length > 4000) {
 					// it's kinda big ... use REST rather than websocket
 					$.ajax( "/API", {
 						method: "POST",

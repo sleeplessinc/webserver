@@ -264,7 +264,11 @@
 				}
 			});
 		};
-		connect();
+
+		window.webserver = {
+			connect: connect,
+		};
+
 
 	}
 

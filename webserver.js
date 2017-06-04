@@ -68,7 +68,6 @@
 
 			// create a connection-specific object that can hold session id's or whatever
 			// this gets passed into ws_api() along with each incoming message.
-			var client = {};
 
 			ws.on('message', function(o) {
 				// receive JSON encoded jacket and payload from browser
@@ -77,12 +76,12 @@
 					var jacket = j2o(o);	// decode JSON back into an object
 					if(jacket) {
 						ws_api(jacket.payload, function(r) {		// call the function with payload
-							// send response back to client
+							// send response back to browser
 							jacket.payload = r;		// replace payload with response (id is same)
 							r = o2j(jacket);			// JSON encode the jacket and contents
 							log("WS --> "+r.abbr(500))
 							ws.send(r);				// send it back to browser
-						}, client);
+						});
 					}
 					else {
 						log("WS Unparseable or null message from browser: "+o2j(o));
@@ -260,7 +259,7 @@
 					// look for obj with jacket.id from TimeHash containing reply callbacks 
 					var rcbs = jacket.id ? th.remove(jacket.id) : null;
 					if(rcbs) {
-						// found; this is a reply to a client-sent message that was sent recently with jacket.id
+						// found; this is a reply to a browser-sent message that was sent recently with jacket.id
 						// pass the response payload to the callback.
 						rcbs.cb(jacket.payload, null, null);
 					}

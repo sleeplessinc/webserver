@@ -248,19 +248,28 @@
 			sock.addEventListener('message', function(msg) {
 				// receive JSON encoded jacket from server
 				var jacket = j2o(msg.data);		// decode jacket back to object
-				// look for obj with jacket.id from TimeHash containing reply callbacks 
-				var rcbs = jacket.id ? th.remove(jacket.id) : null;
-				if(rcbs) {
-					// found; this is a reply to a client-sent message that was sent recently with jacket.id
-					// pass the response payload to the callback.
-					rcbs.cb(jacket.payload, null, null);
-				}
-				else {
-					// this msg originated at server; it's not a reply to a msg sent from browser
-					if(typeof WS_message === "function") {
-						WS_message(jacket.payload);
-						// Note: I currently don't support sending replies to server-originated msgs.
+				if(jacket) {
+					if(jacket.payload === undefined) {
+						jacket.payload = null;
 					}
+					// look for obj with jacket.id from TimeHash containing reply callbacks 
+					var rcbs = jacket.id ? th.remove(jacket.id) : null;
+					if(rcbs) {
+						// found; this is a reply to a client-sent message that was sent recently with jacket.id
+						// pass the response payload to the callback.
+						rcbs.cb(jacket.payload, null, null);
+					}
+					else {
+						// this msg originated at server; it's not a reply to a msg sent from browser
+						if(typeof WS_message === "function") {
+							WS_message(jacket.payload);
+							// Note: I currently don't support sending replies to server-originated msgs.
+						}
+					}
+				} 
+				else {
+					// unparseable or null message
+					WS_error("Unparseable or null message from server");
 				}
 			});
 		};

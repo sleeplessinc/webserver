@@ -71,7 +71,7 @@
 
 			ws.on('message', function(o) {
 				// receive JSON encoded jacket and payload from browser
-				log("WS <-- "+o.abbr(500))
+				//log("WS <-- "+o.abbr(500))
 				if(global["ws_api"]) {		// see if we there is a ws_api() function to call
 					var jacket = j2o(o);	// decode JSON back into an object
 					if(jacket) {
@@ -79,7 +79,7 @@
 							// send response back to browser
 							jacket.payload = r;		// replace payload with response (id is same)
 							r = o2j(jacket);			// JSON encode the jacket and contents
-							log("WS --> "+r.abbr(500))
+							//log("WS --> "+r.abbr(500))
 							ws.send(r);				// send it back to browser
 						});
 					}
@@ -110,10 +110,10 @@
 
 		// REST interface to API
 		xapp.post("/API", upload.array(), function(req, res, next) {
-			log("POST <-- "+o2j(req.body).abbr(500));
+			//log("POST <-- "+o2j(req.body).abbr(500));
 			if(global["ws_api"]) {
 				ws_api(req.body.payload, function(r) {
-					log("POST --> "+o2j(req.body).abbr(500));
+					//log("POST --> "+o2j(req.body).abbr(500));
 					res.json(r);
 				});
 			}

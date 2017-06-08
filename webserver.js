@@ -241,7 +241,7 @@
 			};
 			sock.addEventListener('error', function(err) {
 				if(typeof WS_error === "function") {
-					WS_error(e);
+					WS_error(err);
 				}
 			});
 			sock.addEventListener('open', function() {

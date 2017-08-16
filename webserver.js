@@ -34,7 +34,7 @@
 			// try to load cert & key ...
 			SSL_KEY = fs.readFileSync("ssl/privkey.pem", 'utf8');
 			SSL_CERT = fs.readFileSync("ssl/fullchain.pem", 'utf8');
-			log("SSL cert and key loaded");
+			//log("SSL cert and key loaded");
 
 			// Suceses - so let's be secure!
 			server = https.createServer({key:SSL_KEY, cert:SSL_CERT}, xapp);
@@ -47,7 +47,7 @@
 				res.redirect(u);
 			});
 			rapp.listen(PORT, function() {
-				log("HTTP redirector listening on "+PORT);
+				//log("HTTP redirector listening on "+PORT);
 			});
 
 			PORT = 443;
@@ -64,7 +64,7 @@
 		require('express-ws')(xapp, server);
 		xapp.ws('/', function(ws, req) {
 			// new websocket connection from browser
-			log("WS CONNECT");
+			//log("WS CONNECT");
 
 			// create a connection-specific object that can hold session id's or whatever
 			// this gets passed into ws_api() along with each incoming message.
@@ -84,13 +84,13 @@
 						});
 					}
 					else {
-						log("WS Unparseable or null message from browser: "+o2j(o));
+						//log("WS Unparseable or null message from browser: "+o2j(o));
 					}
 				}
 			});
 			ws.on("close", function() {
 				// lost connection with browser
-				log("WS DISCONNECT")
+				//log("WS DISCONNECT")
 			});
 		});
 
@@ -122,10 +122,13 @@
 
 		// and off we go!
 		server.listen(PORT, function() {
-			log("Listening on "+PORT);
+			//log("Listening on "+PORT);
 		});
 
 
+		// XXX make xapp into an event emitter so that
+		// all events can be listened for, and no log() calls needed.
+		// Is it an event emitter already?
 		module.exports = xapp;
 
 	}

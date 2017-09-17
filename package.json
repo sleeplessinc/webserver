@@ -16,6 +16,7 @@
     "jquery": "^3.2.1",
     "multer": "^1.3.0",
     "paperboy": "0.0.5",
+    "send": "^0.15.4",
     "sleepless": "^2.4.7"
   },
   "main": "webserver.js",

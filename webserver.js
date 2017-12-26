@@ -231,7 +231,9 @@
 							cb(o, s, jx);	// response, status, jqXHR
 						},
 						error: function(jx, e, ex) {
-							err_cb(e, ex);	// err, stack (toss jqXHR)
+							if(err_cb) {
+								err_cb(e, ex);	// err, stack (toss jqXHR)
+							}
 						},
 					});
 				}

@@ -78,8 +78,8 @@ ws.on("error", log);
 ws.on("request", function(req) { log(req.method + " " + req.url); });
 ws.on("route", function(route, matches, path) { log("ROUTING: "+o2j(route)+" path= "+path+" matches="+o2j(matches)); });
 
-ws.routes.push({ match: /^\/foo\/([a-z]+)$/, module:"foo" });
-ws.routes.push({ match: /^\/bar/, module:"bar" });
+ws.routes.push({ match: /^\/user\/([a-z]+)$/, module:"user" });
+ws.routes.push({ match: /^\/foo/, module:"foo" });
 
 ws.listen(12345, () => {
 	log("listening");

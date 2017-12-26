@@ -211,7 +211,7 @@
 				}
 				setTimeout(connect, 2 * 1000);		// attempt to reconnect
 			});
-			send = function(data, cb, err_cb) {
+			var send = function(data, cb, err_cb) {
 
 				// wrap the payload in a jacket that includes a unique id number
 				var id = seq += 1;

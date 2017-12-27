@@ -80,7 +80,9 @@
 							jacket.payload = r;		// replace payload with response (id is same)
 							r = o2j(jacket);			// JSON encode the jacket and contents
 							//log("WS --> "+r.abbr(500))
-							ws.send(r);				// send it back to browser
+							if(ws.readyState == WebSocket.OPEN) {   // XXX
+								ws.send(r);				// send it back to browser
+							}
 						});
 					}
 					else {

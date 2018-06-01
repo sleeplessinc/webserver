@@ -32,5 +32,9 @@
   "bugs": {
     "url": "https://github.com/sleeplessinc/webserver/issues"
   },
+  "bin": {
+    "webserver": "./bin/global.js"
+  },
+  "preferGlobal": true,
   "homepage": "https://github.com/sleeplessinc/webserver#readme"
 }

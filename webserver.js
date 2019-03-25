@@ -25,6 +25,7 @@
 		var server = null;
 
 		var PORT = toInt(process.argv[2]) || 80;
+		var SITE = toInt(process.argv[3]) || "site";
 
 		var SSL_KEY = null;
 		var SSL_CERT = null;
@@ -105,7 +106,7 @@
 		*/
 
 		// static files
-		xapp.use("/", express.static('site'));
+		xapp.use("/", express.static(SITE));
 
 		xapp.use(bodyParser.json({limit:"50mb"}));
 		xapp.use(bodyParser.urlencoded({limit:"50mb", extended:true}));

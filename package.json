@@ -1,6 +1,6 @@
 {
   "name": "webserver",
-  "version": "3.1.16",
+  "version": "3.2.0",
   "description": "A very simple webserver for delivering static files.",
   "author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
   "keywords": [

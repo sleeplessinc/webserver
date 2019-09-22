@@ -6,7 +6,19 @@
 
 ## Usage
 
-Server side:
+### CLI
+	npm i -g webserver
+	webserver
+
+To change the port number call:  
+
+	webserver --port=12345
+
+To change the directory (default is './Site'):  
+
+	webserver --dir=my_site
+
+### Server side:
 
 	webserver = require("./webserver.js");
 
@@ -18,7 +30,7 @@ Server side:
 		...
 	}
 
-Client side uses the same webserver.js file:
+### Client side uses the same webserver.js file:
 
 	<script src="jquery.js"></script>
 	<script src="webserver.js"></script>

@@ -71,8 +71,28 @@ function createServer(opts) {
 };
 
 //	-	-	-	-	-	-	-	-	-	-	-	-
+var port = 12345;
+var dir = "./Site";
 
-var ws = createServer({ DOC_ROOT: "./site" });
+process.argv.forEach(function (val, index, array) {
+	// Get port arg if specified
+	let port_search = /--port=(.*)/g;
+	let m = port_search.exec(val);
+	if(m){
+		port = m[1];
+		console.log("PORT: " + port);
+	}
+
+	// Get DIR arg if specified	
+	let dir_search = /--dir=(.*)/g;
+	m = dir_search.exec(val);
+	if(m){
+		dir = m[1];
+		console.log("DIR: " + dir);
+	}
+});
+
+var ws = createServer({ DOC_ROOT: dir });
 
 ws.on("error", log);
 ws.on("request", function(req) { log(req.method + " " + req.url); });
@@ -81,8 +101,8 @@ ws.on("route", function(route, matches, path) { log("ROUTING: "+o2j(route)+" pat
 ws.routes.push({ match: /^\/user\/([a-z]+)$/, module:"user" });
 ws.routes.push({ match: /^\/foo/, module:"foo" });
 
-ws.listen(12345, () => {
-	log("listening");
+ws.listen(port, () => {
+	log("listening on port: " + port);
 });
 
 

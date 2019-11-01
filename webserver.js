@@ -24,8 +24,10 @@
 		var xapp = express();
 		var server = null;
 
+		var DEBUG = process.argv[4] ? function(s){ log(s); } : function(){};
+
 		var PORT = toInt(process.argv[2]) || 80;
-		var SITE = toInt(process.argv[3]) || "site";
+		var SITE = process.argv[3] || "site";
 
 		var SSL_KEY = null;
 		var SSL_CERT = null;
@@ -35,7 +37,7 @@
 			// try to load cert & key ...
 			SSL_KEY = fs.readFileSync("ssl/privkey.pem", 'utf8');
 			SSL_CERT = fs.readFileSync("ssl/fullchain.pem", 'utf8');
-			//log("SSL cert and key loaded");
+			DEBUG("SSL cert and key loaded");
 
 			// Suceses - so let's be secure!
 			server = https.createServer({key:SSL_KEY, cert:SSL_CERT}, xapp);
@@ -44,11 +46,11 @@
 			var rapp = express();
 			rapp.use("/", function(req, res, next) {
 				var u = 'https://' + req.hostname + req.originalUrl;
-				//log("redirecting to "+u);
+				DEBUG("redirecting to "+u);
 				res.redirect(u);
 			});
 			rapp.listen(PORT, function() {
-				//log("HTTP redirector listening on "+PORT);
+				DEBUG("HTTP redirector listening on "+PORT);
 			});
 
 			PORT = 443;
@@ -65,14 +67,14 @@
 		require('express-ws')(xapp, server);
 		xapp.ws('/', function(ws, req) {
 			// new websocket connection from browser
-			//log("WS CONNECT");
+			DEBUG("WS CONNECT");
 
 			// create a connection-specific object that can hold session id's or whatever
 			// this gets passed into ws_api() along with each incoming message.
 
 			ws.on('message', function(o) {
 				// receive JSON encoded jacket and payload from browser
-				//log("WS <-- "+o.abbr(500))
+				DEBUG("WS <-- "+o.abbr(500))
 				if(global["ws_api"]) {		// see if we there is a ws_api() function to call
 					var jacket = j2o(o);	// decode JSON back into an object
 					if(jacket) {
@@ -80,20 +82,20 @@
 							// send response back to browser
 							jacket.payload = r;		// replace payload with response (id is same)
 							r = o2j(jacket);			// JSON encode the jacket and contents
-							//log("WS --> "+r.abbr(500))
+							DEBUG("WS --> "+r.abbr(500))
 							if(ws.readyState == ws.OPEN) {   // XXX
 								ws.send(r);				// send it back to browser
 							}
 						});
 					}
 					else {
-						//log("WS Unparseable or null message from browser: "+o2j(o));
+						DEBUG("WS Unparseable or null message from browser: "+o2j(o));
 					}
 				}
 			});
 			ws.on("close", function() {
 				// lost connection with browser
-				//log("WS DISCONNECT")
+				DEBUG("WS DISCONNECT")
 			});
 		});
 
@@ -113,10 +115,10 @@
 
 		// REST interface to API
 		xapp.post("/API", upload.array(), function(req, res, next) {
-			//log("POST <-- "+o2j(req.body).abbr(500));
+			DEBUG("POST <-- "+o2j(req.body).abbr(500));
 			if(global["ws_api"]) {
 				ws_api(req.body.payload, function(r) {
-					//log("POST --> "+o2j(req.body).abbr(500));
+					DEBUG("POST --> "+o2j(req.body).abbr(500));
 					res.json(r);
 				});
 			}
@@ -125,7 +127,7 @@
 
 		// and off we go!
 		server.listen(PORT, function() {
-			//log("Listening on "+PORT);
+			DEBUG("Listening on "+PORT+", serving from "+SITE);
 		});
 
 

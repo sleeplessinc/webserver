@@ -8,6 +8,9 @@
     "web",
     "server"
   ],
+  "bin": {
+  	"webserver": "webserver.js"
+  },
   "dependencies": {
     "send": "^0.17.1"
   },

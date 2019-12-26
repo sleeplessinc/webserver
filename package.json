@@ -9,7 +9,7 @@
     "server"
   ],
   "dependencies": {
-    "send": "^4.17.1"
+    "send": "^0.17.1"
   },
   "main": "webserver.js",
   "devDependencies": {},

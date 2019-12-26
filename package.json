@@ -1,6 +1,6 @@
 {
   "name": "webserver",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "A very simple webserver for delivering static files.",
   "author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
   "keywords": [
@@ -9,9 +9,10 @@
     "server"
   ],
   "bin": {
-  	"webserver": "webserver.js"
+    "webserver": "webserver.js"
   },
   "dependencies": {
+    "parseurl": "^1.3.3",
     "send": "^0.17.1"
   },
   "main": "webserver.js",

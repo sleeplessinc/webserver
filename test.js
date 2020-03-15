@@ -1,49 +1,40 @@
 
 
-sleepless = require( "sleepless" );
+let sleepless = require( "sleepless" );
 
 let argv = process.argv;
 
 let domain = argv[ 2 ];
-let port = argv[ 3 ];
-let subscriberEmail = argv[ 4 ];
-
-let agreeToTerms = true;
+let email = argv[ 3 ];
+let port = argv[ 4 ];
 
 let usage = function() {
 	log( "Usage: node test.js DOMAIN PORT EMAIL" );
-	log( "Example: node test.js example.com 443 foo@bar.com" );
+	log( "Example: node test.js" );
 	process.exit( 1 );
 }
 
-if( argv.length != 5 )
-	usage();
-
-webserver = require( "./webserver.js" );
+//if( argv.length != 5 )
+//	usage();
 
 
-ws_handler = function( ws_event ) {
-	log( "WS: " + ws_event.msg );
-	//ws_event.reply( "WS: " + ws_event.msg );
+let websocket_handler = function( ws, req ) {
+	log( "WS: connect" );
+	ws.send( "ws test" );
+	//ws.on( "message", function( data ) {
+	//	ws.send( data );
+	//});
 }
 
-http_handler = function( req, res, next ) {
+let http_handler = function( req, res, next ) {
 	log( "HTTP: " + req.url );
-	res.end( "Hi." );
+	res.end( "Hi " + time() );
 }
 
 
-server = webserver.create( {
-		domain,
-		http_handler,
-		ws_handler,
-		agreeToTerms,
-		subscriberEmail,
-	} );
+let webserver = require( "./webserver.js" );
+webserver( { http_handler, websocket_handler } );
 
-server.listen( port, function() {
-	log( "Listening" );
-});
 
 
 

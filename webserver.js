@@ -5,23 +5,25 @@
 // All Rights Reserved
 // sleepless.com
 
+const sleepless = require("sleepless");
 
-let Greenlock = require( "greenlock" );
+module.exports = function( opts ) {
 
-let create = function( cfg, cb ) {
-	//let greenlock = Greenlock.create({});
-	Greenlock.create( cfg )
-	.manager
-	.defaults( cfg )
-	.then( function( fullConfig ) {
-		let listen = function( port, cb ) {
-			cb();
-		};
-		return cb( { listen } );
+	require("greenlock-express")
+	.init({
+		packageRoot: ".",
+		configDir: "./greenlock.d",
+		maintainerEmail: "joe@sleepless.com",	// contact for security and critical bug notices
+		cluster: false			// whether or not to run at cloudscale
+	})
+	.ready( function( glx ) {
+
+		let server = glx.httpServer();
+		let WebSocket = require( "ws" );
+		let ws = new WebSocket.Server( { server: server } );
+		ws.on( "connection", opts.websocket_handler ); 
+		glx.serveApp( opts.http_handler );
 	});
-};
 
-
-module.exports = { create };
-
+}
 

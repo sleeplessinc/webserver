@@ -1,11 +1,23 @@
 
 
+sleepless = require( "sleepless" );
+
 let argv = process.argv;
 
-let domain = argv[ 2 ] || "foobar.baz";
-let port = argv[ 2 ] || 80;
+let domain = argv[ 2 ];
+let port = argv[ 3 ];
+let subscriberEmail = argv[ 4 ];
 
-sleepless = require( "sleepless" );
+let agreeToTerms = true;
+
+let usage = function() {
+	log( "Usage: node test.js DOMAIN PORT EMAIL" );
+	log( "Example: node test.js example.com 443 foo@bar.com" );
+	process.exit( 1 );
+}
+
+if( argv.length != 5 )
+	usage();
 
 webserver = require( "./webserver.js" );
 
@@ -21,7 +33,13 @@ http_handler = function( req, res, next ) {
 }
 
 
-server = webserver.create( { domain, http_handler, ws_handler } );
+server = webserver.create( {
+		domain,
+		http_handler,
+		ws_handler,
+		agreeToTerms,
+		subscriberEmail,
+	} );
 
 server.listen( port, function() {
 	log( "Listening" );

@@ -6,15 +6,19 @@
 // sleepless.com
 
 
+let Greenlock = require( "greenlock" );
 
-let create = function( cfg ) {
-
-	let listen = function( port, cb ) {
-		cb();
-	};
-
-	return { listen };
-
+let create = function( cfg, cb ) {
+	//let greenlock = Greenlock.create({});
+	Greenlock.create( cfg )
+	.manager
+	.defaults( cfg )
+	.then( function( fullConfig ) {
+		let listen = function( port, cb ) {
+			cb();
+		};
+		return cb( { listen } );
+	});
 };
 
 

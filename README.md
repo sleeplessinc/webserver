@@ -12,11 +12,16 @@ THIS IS A SOFTWARE DEVELOPMENT TOOL AND NOT INTENDED FOR REAL WEBSITES ON THE IN
 
 This is a node module for development purposes or very light-duty, low-security webservice.
 
-It lets you create a webserver with HTTPS and websockets with a minimal amount of difficulty.
+It lets you create a webserver with HTTPS (using greenlock-express) and websockets
+with a minimal amount of difficulty:
 
 	npm install webserver
 
-	node example.js
+	node example.js EMAIL_ADDRESS DOMAIN_NAME
+
+For example:
+
+	node example.js you@example.com example.com
 
 See example.js for details on usage.
 

@@ -4,13 +4,10 @@
   "description": "Simplified http server with SSL and Websockets.  Includes a shell script to deliver static files during development.",
   "main": "webserver.js",
   "dependencies": {
-    //"auto-sni": "^2.3.2",
     "ds": "^1.4.2",
     "express": "^4.17.1",
     "greenlock-express": "^4.0.3",
-    //"greenlock-store-fs": "^3.2.2",
     "sleepless": "^2.7.2",
-    //"websocket": "^1.0.31",
     "ws": "^7.2.3"
   },
   "devDependencies": {},

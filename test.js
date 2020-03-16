@@ -19,21 +19,25 @@ let usage = function() {
 
 
 let websocket_handler = function( ws, req ) {
-	log( "WS: connect" );
-	ws.send( "ws test" );
-	//ws.on( "message", function( data ) {
-	//	ws.send( data );
-	//});
+	log( "WS: connection" );
+	ws.send( "Hi client, i am server." );
+	ws.on( "message", function( data ) {
+		log( "msg from client reads: " + data );
+		ws.send( "you said: " + data );
+	});
 }
 
-let http_handler = function( req, res, next ) {
+app = require( "express" )();
+app.use(function( req, res, next ) {
 	log( "HTTP: " + req.url );
-	res.end( "Hi " + time() );
-}
+	let html = require("fs").readFileSync( "./index.html", "utf8" );
+	res.setHeader( "Content-Type", "text/html; charset=utf-8" );
+	res.end( html );
+});
 
 
 let webserver = require( "./webserver.js" );
-webserver( { http_handler, websocket_handler } );
+webserver( { http_handler: app, websocket_handler } );
 
 
 

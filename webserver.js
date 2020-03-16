@@ -14,17 +14,27 @@ module.exports = function( opts ) {
 		packageRoot: ".",
 		configDir: "./greenlock.d",
 		cluster: false,
+		staging: true,
 		websocket_handler: function(){},
+		notify: function(){},
 	}
 	for( let k in def_opts ) {
 		if( opts[ k ] === undefined ) {
 			opts[ k ] = def_opts[ k ];
 		}
 	}
+
+	throwIf( ! opts.email, "The 'email' attribute required in options" );
+	throwIf( ! opts.domains, "The 'domains' attribute required in options" );
+
 	opts.maintainerEmail = opts.email;
 
-	throwIf( ! opts.email, "The 'maintainerEmail' attribute required in options" );
-
+	let domains = opts.domains;
+	let p = opts.configDir + "/config.json";
+	let DS = require("ds").DS;
+	let ds = new DS( p );
+	ds.sites = [ { subject: domains[ 0 ], altnames: domains } ];
+	ds.save();
 
 	require("greenlock-express")
 	.init( opts )

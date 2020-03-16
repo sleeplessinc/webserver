@@ -2,6 +2,7 @@
 let argv = process.argv;
 
 let email = argv[ 2 ];
+let domains = argv[ 3 ].split( "," );
 
 // create a simple express app that returns index.html for all requests
 express = require( "express" );
@@ -15,18 +16,21 @@ app.use(function( req, res, next ) {
 
 // This function handles incoming websocket connections
 let ws = function( socket, req ) {
-	// a websocket "connection" has come in from the client/browser.
-	socket.send( "Welcome!  I'll be your server today." );		// send a websocket msg to client
-	// Respond to incoming messages
+	socket.send( "A socket connection has come in.  Welcome, client!  I'll be your server today." );
 	socket.on( "message", function( data ) {
-		// A websocket message (data) has come in from the client/browser.
-		socket.send( "I hear you!  You said: " + data );		// echo it back
+		socket.send( "Hey client, thanks for the message: " + data );	
 	});
 }
 
 
 // create our cool webserver
 let webserver = require( "./webserver.js" );
-webserver( { http_handler: app, websocket_handler: ws, email } );
+webserver({
+	http_handler: app,		// Required
+	websocket_handler: ws,	// Required
+	email,					// required
+	domains,				// Required
+	staging: false,			// Optional. Defaults to "true". Change to "false" for production.
+});
 
 

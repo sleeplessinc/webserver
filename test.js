@@ -1,44 +1,32 @@
 
-
-let sleepless = require( "sleepless" );
-
 let argv = process.argv;
 
-let domain = argv[ 2 ];
-let email = argv[ 3 ];
-let port = argv[ 4 ];
+let email = argv[ 2 ];
 
-let usage = function() {
-	log( "Usage: node test.js DOMAIN PORT EMAIL" );
-	log( "Example: node test.js" );
-	process.exit( 1 );
-}
-
-//if( argv.length != 5 )
-//	usage();
-
-
-let websocket_handler = function( ws, req ) {
-	log( "WS: connection" );
-	ws.send( "Hi client, i am server." );
-	ws.on( "message", function( data ) {
-		log( "msg from client reads: " + data );
-		ws.send( "you said: " + data );
-	});
-}
-
-app = require( "express" )();
+// create a simple express app that returns index.html for all requests
+express = require( "express" );
+app = express();
 app.use(function( req, res, next ) {
-	log( "HTTP: " + req.url );
 	let html = require("fs").readFileSync( "./index.html", "utf8" );
 	res.setHeader( "Content-Type", "text/html; charset=utf-8" );
 	res.end( html );
 });
 
 
+// This function handles incoming websocket connections
+let ws = function( socket, req ) {
+	// a websocket "connection" has come in from the client/browser.
+	socket.send( "Welcome!  I'll be your server today." );		// send a websocket msg to client
+	// Respond to incoming messages
+	socket.on( "message", function( data ) {
+		// A websocket message (data) has come in from the client/browser.
+		socket.send( "I hear you!  You said: " + data );		// echo it back
+	});
+}
+
+
+// create our cool webserver
 let webserver = require( "./webserver.js" );
-webserver( { http_handler: app, websocket_handler } );
-
-
+webserver( { http_handler: app, websocket_handler: ws, email } );
 
 

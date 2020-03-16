@@ -17,11 +17,11 @@ with a minimal amount of difficulty:
 
 	npm install webserver
 
-	node example.js EMAIL_ADDRESS DOMAIN_NAME
+	node node_modules/webserver/example.js EMAIL_ADDRESS DOMAIN_NAME
 
 For example:
 
-	node example.js you@example.com example.com
+	node node_modules/webserver/example.js you@example.com example.com
 
 See example.js for details on usage.
 

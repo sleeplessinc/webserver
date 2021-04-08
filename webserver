@@ -6,7 +6,7 @@
 // All Rights Reserved
 // sleepless.com
 
-const L = require( "log5" ).mkLog( "webserver: " )( 5 );
+const L = require( "log5" ).mkLog( "webserver: " )( 4 );
 
 const argv = process.argv;
 if( argv.length < 3 ) {
@@ -25,6 +25,7 @@ if( ! act ) return;
 if( act == "create" ) {
 	const fs = require( "fs" );
 	const path = require( "path" );
+	const { exec } = require( "child_process" );
 	let PATH = argv[3];
 	let old_path = PATH;
 	// use local path or absolute path
@@ -33,52 +34,19 @@ if( act == "create" ) {
 	if( !fs.existsSync(PATH) ) {
 		fs.mkdir( PATH, { recursive: true }, ( err, p ) => {
 			if( err ) { return console.error( err ); }
-			L.V( `made directory ${p}` );
+			L.I( `made directory ${p}` );
 			// To copy a folder or file  
-			copyFolderRecursiveSync( path.join(__dirname, "template/"), PATH);
-			L.V(`webserver run 3000 ${old_path}`);
+			if( PATH[ PATH.length - 1 ] != "/" )  { PATH += "/"; }
+			exec(`cp -r template/* ${PATH}; cd ${PATH}; npm i;`, err => {
+				if( err ) { L.E( err ); return; }
+				L.I(`webserver run 3000 ${old_path}`);
+			});
 		})
 		return;
 	}
 
 	console.error( `${PATH} already exists. Exiting...`);
 	return;
-
-	function copyFileSync( source, target ) {
-		var targetFile = target;
-
-		// If target is a directory, a new file with the same name will be created
-		if ( fs.existsSync( target ) ) {
-			if ( fs.lstatSync( target ).isDirectory() ) {
-				targetFile = path.join( target, path.basename( source ) );
-			}
-		}
-
-		fs.writeFileSync(targetFile, fs.readFileSync(source));
-	}
-
-	function copyFolderRecursiveSync( source, target ) {
-		var files = [];
-
-		// Check if folder needs to be created or integrated
-		var targetFolder = target; 
-		if ( !fs.existsSync( targetFolder ) ) {
-			fs.mkdirSync( targetFolder );
-		}
-
-		// Copy
-		if ( fs.lstatSync( source ).isDirectory() ) {
-			files = fs.readdirSync( source );
-			files.forEach( function ( file ) {
-				var curSource = path.join( source, file );
-				if ( fs.lstatSync( curSource ).isDirectory() ) {
-					copyFolderRecursiveSync( curSource, targetFolder );
-				} else {
-					copyFileSync( curSource, targetFolder );
-				}
-			} );
-		}
-	}
 }
 
 if( act == "run" ) {
@@ -93,30 +61,20 @@ if( act == "run" ) {
 	var send = require('send')
 	
 	var server = http.createServer(function onRequest (req, res ) {
-		L.V( req.method + " " + req.url );
+		L.D( req.method + " " + req.url );
 		dispatch( PATH, req, res )
 	});
 	
 	if( WATCH ) {
-		const path = require( "path" );
-		const { spawn } = require("child_process");
-		const e = spawn(`./${PATH}/watch`);
+		let path = require("path");
+		let { spawn, exec } = require("child_process");
+		let p = path.isAbsolute(PATH) ? `${PATH}` : `./${PATH}`;
 
-		e.stdout.on("data", data => {
-			L.V(`stdout: ${data}`);
+		// sandbox watch
+		exec(`cd ${p}; chmod +x ${p}watch; ./watch &`, err => {
+			if( err ) { L.E( err ); return; }
 		});
 
-		e.stderr.on("data", data => {
-			L.V(`stderr: ${data}`);
-		});
-
-		e.on('error', (error) => {
-			L.E(`error: ${error}`);
-		});
-
-		e.on("close", code => {
-			L.E(`child process exited with code ${code}`);
-		});
 	}
 	server.listen( PORT, function() { 
 		L.I( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );

@@ -1,7 +1,7 @@
 {
   "name": "webserver",
-  "version": "5.0.0",
-  "description": "Simplified http server with SSL and Websockets.  Includes a shell script to deliver static files during development.",
+  "version": "5.0.1",
+  "description": "An HTTP Server",
   "main": "webserver.js",
   "dependencies": {
     "ds": "^1.4.2",

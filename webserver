@@ -110,7 +110,7 @@ if( act == "run" ) {
 		});
 
 		e.on('error', (error) => {
-			console.log(`error: ${error.message}`);
+			console.log(`error: ${error}`);
 		});
 
 		e.on("close", code => {

@@ -6,14 +6,15 @@
 // All Rights Reserved
 // sleepless.com
 
+const L = require( "log5" ).mkLog( "webserver: " )( 5 );
 
 const argv = process.argv;
 if( argv.length < 3 ) {
-	console.log( "Usage: webserver <create/run> <project_name/port> <dir>" );
-	console.log( "For example: webserver create my_app");
-	console.log( "For example: webserver create ~/d/another_app");
-	console.log( "For example: webserver run 3000 my_app");
-	console.log( "For example: webserver run 3000 ~/d/another_app");
+	L.E( "Usage: webserver <create/run> <project_name/port> <dir>" );
+	L.E( "For example: webserver create my_app");
+	L.E( "For example: webserver create ~/d/another_app");
+	L.E( "For example: webserver run 3000 my_app");
+	L.E( "For example: webserver run 3000 ~/d/another_app");
 	process.exit( 1 );
 }
 
@@ -32,10 +33,10 @@ if( act == "create" ) {
 	if( !fs.existsSync(PATH) ) {
 		fs.mkdir( PATH, { recursive: true }, ( err, p ) => {
 			if( err ) { return console.error( err ); }
-			console.log( `made directory ${p}` );
+			L.V( `made directory ${p}` );
 			// To copy a folder or file  
 			copyFolderRecursiveSync( path.join(__dirname, "template/"), PATH);
-			console.log(`webserver run 3000 ${old_path}`);
+			L.V(`webserver run 3000 ${old_path}`);
 		})
 		return;
 	}
@@ -91,9 +92,9 @@ if( act == "run" ) {
 	var parseUrl = require('parseurl')
 	var send = require('send')
 	
-	var server = http.createServer(function onRequest (req, res) {
-		console.log( req.method + " " + req.url );
-		send(req, parseUrl(req).pathname, { root: PATH }) .pipe(res);
+	var server = http.createServer(function onRequest (req, res ) {
+		L.V( req.method + " " + req.url );
+		dispatch( PATH, req, res )
 	});
 	
 	if( WATCH ) {
@@ -102,23 +103,58 @@ if( act == "run" ) {
 		const e = spawn(`./${PATH}/watch`);
 
 		e.stdout.on("data", data => {
-			console.log(`stdout: ${data}`);
+			L.V(`stdout: ${data}`);
 		});
 
 		e.stderr.on("data", data => {
-			console.log(`stderr: ${data}`);
+			L.V(`stderr: ${data}`);
 		});
 
 		e.on('error', (error) => {
-			console.log(`error: ${error}`);
+			L.E(`error: ${error}`);
 		});
 
 		e.on("close", code => {
-			console.log(`child process exited with code ${code}`);
+			L.E(`child process exited with code ${code}`);
 		});
 	}
 	server.listen( PORT, function() { 
-		console.log( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
-		console.log( "Listening on port " + PORT + ", serving from directory \"" + PATH + "\"");
+		L.I( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
+		L.I( "Listening on port " + PORT + ", serving from directory \"" + PATH + "\"");
 	});
+
+	const serve_static = require("serve-static");
+
+	let dispatch = function( root, req, res ) {
+		let mod = mod_load( root );
+		if( mod ) { 
+			L.D("root module loaded "+root);
+			mod( req, res );
+		} else {
+			send(req, parseUrl(req).pathname, { root: root }) .pipe(res);
+		}
+	}
+
+	// Tries to load path (must be a dir) as an NPM module. Returns the module or null.
+	let mod_load = function( path, n ) {
+		let mod = null;
+		try {
+			mod = require( path );
+			L.D( "mod loaded: " +  path );
+		} catch( err ) {
+			// If this e.code is present, it means the module just couldn't be loaded for some reason.
+			// But it seems not to be there if the module loaded but got a syntax error or something,
+			// which I DO want to see, so I differentiate between those two cases here.
+			if( err .code == "MODULE_NOT_FOUND") {
+				L.D( "module not found: " + path );
+				//L.W(e.stack);	
+			}
+			else {
+				//L.W( "module present but fails to load" );
+				L.E( err .stack );
+			}
+		}
+
+		return mod;
+	}
 }

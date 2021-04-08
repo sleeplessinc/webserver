@@ -7,6 +7,8 @@
     "ds": "^1.4.2",
     "express": "^4.17.1",
     "greenlock-express": "^4.0.3",
+    "log5": "^2.3.0",
+    "serve-static": "^1.14.1",
     "sleepless": "^2.7.2",
     "socket.io": "^2.3.0",
     "ws": "^7.2.3"

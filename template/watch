@@ -17,8 +17,8 @@ while true ; do
     next=`$lscmd | grep -v reload.js | sum`
 	if [ "$next" != "$last" ] ; then
 		last="$next"
-		echo "globalThis.needs_reload = '$next';" > reload.js;
-		cat reload.js
+		echo "globalThis.needs_reload = '$next';" > static/reload.js;
+		cat static/reload.js
 	fi
 	sleep 1
 done

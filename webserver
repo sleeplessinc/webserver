@@ -129,7 +129,11 @@ if( act == "run" ) {
 		let mod = mod_load( root );
 		if( mod ) { 
 			L.D("root module loaded "+root);
-			mod( req, res );
+		   	mod( req, res, (r1, r2) => {
+				if( r1 && r2 ) {
+					send(r1, parseUrl(r1).pathname, { root: root }).pipe(r2);
+				}
+			});
 		} else {
 			send(req, parseUrl(req).pathname, { root: root }) .pipe(res);
 		}
@@ -138,20 +142,23 @@ if( act == "run" ) {
 	// Tries to load path (must be a dir) as an NPM module. Returns the module or null.
 	let mod_load = function( path, n ) {
 		let mod = null;
+		const p = require("path");
 		try {
+			// use local path or absolute path
+			if( path && ! p.isAbsolute(path) ) { path = p.join(__dirname, path); }
 			mod = require( path );
 			L.D( "mod loaded: " +  path );
 		} catch( err ) {
 			// If this e.code is present, it means the module just couldn't be loaded for some reason.
 			// But it seems not to be there if the module loaded but got a syntax error or something,
 			// which I DO want to see, so I differentiate between those two cases here.
-			if( err .code == "MODULE_NOT_FOUND") {
+			if( err.code == "MODULE_NOT_FOUND") {
 				L.D( "module not found: " + path );
-				//L.W(e.stack);	
+				// L.W(err.stack);	
 			}
 			else {
 				//L.W( "module present but fails to load" );
-				L.E( err .stack );
+				L.E( err.stack );
 			}
 		}
 

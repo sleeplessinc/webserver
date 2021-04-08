@@ -6,29 +6,119 @@
 // All Rights Reserved
 // sleepless.com
 
+
 const argv = process.argv;
 if( argv.length < 3 ) {
-	console.log( "Usage: node webserver.js PORT [ DOC_ROOT ]" );
+	console.log( "Usage: webserver <create/run> <project_name/port> <dir>" );
+	console.log( "For example: webserver create my_app");
+	console.log( "For example: webserver create ~/d/another_app");
+	console.log( "For example: webserver run 3000 my_app");
+	console.log( "For example: webserver run 3000 ~/d/another_app");
 	process.exit( 1 );
 }
 
-let PORT = argv[ 2 ] || 80;
-let PATH = argv[ 3 ] || "./";
+let act = argv[ 2 ] || null;
 
-if( PATH[ PATH.length - 1 ] != "/" ) 
-	PATH += "/";
+if( ! act ) return;
 
-var http = require('http')
-var parseUrl = require('parseurl')
-var send = require('send')
- 
-var server = http.createServer(function onRequest (req, res) {
-	console.log( req.method + " " + req.url );
-	send(req, parseUrl(req).pathname, { root: PATH }) .pipe(res);
-});
- 
-server.listen( PORT, function() { 
-	console.log( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
-	console.log( "Listening on port " + PORT + ", serving from directory \"" + PATH + "\"");
-});
+if( act == "create" ) {
+	const fs = require( "fs" );
+	const path = require( "path" );
+	let PATH = argv[3];
+	let old_path = PATH;
+	// use local path or absolute path
+	if( PATH && ! path.isAbsolute(PATH) ) { PATH = path.join(__dirname, PATH); }
 
+	if( !fs.existsSync(PATH) ) {
+		fs.mkdir( PATH, { recursive: true }, ( err, p ) => {
+			if( err ) { return console.error( err ); }
+			console.log( `made directory ${p}` );
+			// To copy a folder or file  
+			copyFolderRecursiveSync( path.join(__dirname, "template/"), PATH);
+			console.log(`webserver run 3000 ${old_path}`);
+		})
+		return;
+	}
+
+	console.error( `${PATH} already exists. Exiting...`);
+	return;
+
+	function copyFileSync( source, target ) {
+		var targetFile = target;
+
+		// If target is a directory, a new file with the same name will be created
+		if ( fs.existsSync( target ) ) {
+			if ( fs.lstatSync( target ).isDirectory() ) {
+				targetFile = path.join( target, path.basename( source ) );
+			}
+		}
+
+		fs.writeFileSync(targetFile, fs.readFileSync(source));
+	}
+
+	function copyFolderRecursiveSync( source, target ) {
+		var files = [];
+
+		// Check if folder needs to be created or integrated
+		var targetFolder = target; 
+		if ( !fs.existsSync( targetFolder ) ) {
+			fs.mkdirSync( targetFolder );
+		}
+
+		// Copy
+		if ( fs.lstatSync( source ).isDirectory() ) {
+			files = fs.readdirSync( source );
+			files.forEach( function ( file ) {
+				var curSource = path.join( source, file );
+				if ( fs.lstatSync( curSource ).isDirectory() ) {
+					copyFolderRecursiveSync( curSource, targetFolder );
+				} else {
+					copyFileSync( curSource, targetFolder );
+				}
+			} );
+		}
+	}
+}
+
+if( act == "run" ) {
+	let PORT = argv[3] || 12345;
+	let PATH = argv[4] || "./";
+	if( PATH[ PATH.length - 1 ] != "/" )  { PATH += "/"; }
+
+	let WATCH = argv[5];
+
+	var http = require('http')
+	var parseUrl = require('parseurl')
+	var send = require('send')
+	
+	var server = http.createServer(function onRequest (req, res) {
+		console.log( req.method + " " + req.url );
+		send(req, parseUrl(req).pathname, { root: PATH }) .pipe(res);
+	});
+	
+	if( WATCH ) {
+		const path = require( "path" );
+		const { spawn } = require("child_process");
+		const e = spawn(`./${PATH}/watch`);
+
+		e.stdout.on("data", data => {
+			console.log(`stdout: ${data}`);
+		});
+
+		e.stderr.on("data", data => {
+			console.log(`stderr: ${data}`);
+		});
+
+		e.on('error', (error) => {
+			console.log(`error: ${error.message}`);
+		});
+
+		e.on("close", code => {
+			console.log(`child process exited with code ${code}`);
+		});
+	}
+	server.listen( PORT, function() { 
+		console.log( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
+		console.log( "Listening on port " + PORT + ", serving from directory \"" + PATH + "\"");
+	});
+}

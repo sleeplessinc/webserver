@@ -4,12 +4,19 @@ function server_log( txt ) { rpc({ act: "log", msg: txt }); }
 
 document.addEventListener( "DOMContentLoaded", dcl => {
 	sleepless.globalize();
+	let c = rplc8("#calls");
+
 	server_log("ping")
 	checkReload();
 	document.querySelector( "#okay" ).addEventListener( "click", e => {
 		let ok = confirm("Okay?");
 		if( ok ) alert("Okay. Okay. Okay.");
 	});
+
+	rpc({ act: "calls" }, calls => {
+		if( ! calls ) { return; }
+		c.update(calls.map(ca => { return { key: ca }}));
+	})
 });
 
 let old_reload = null, reload_script = null;
@@ -32,7 +39,7 @@ function rpc( o = { act: "log", msg: "empty request"}, cb ) {
     var client = new XMLHttpRequest();
     client.onreadystatechange = function() {
 		if( this.status == 200 && this.readyState == 4 ) {
-			if( ! cb ) return;
+			if( ! cb ) { console.error( this ); return; }
 			cb( this?.responseText || null );
 		}
     };

@@ -5,10 +5,26 @@ require('sleepless').globalize();
 
 const L = require( "log5" ).mkLog( "api: " )( 5 );
 
-let api = function( req, res, cb ) {
+let api = function( req, res ) {
+
+	let calls = ["log", "db", "do_something"];
 
 	let body = req?.body || {};
 	body = j2o(body);
+
+	let okay = function( data = "" ) {
+		res.writeHead(200, { 'Content-Type': 'application/json' });
+    	res.write(j2o(data));
+		L.I(data);
+		res.end();
+	}
+
+	let fail = function( data = "" ) {
+		res.writeHead(500, { 'Content-Type': 'application/json' });
+		res.write(o2j(data));
+		L.E(data);
+		res.end();
+	}
 
 	let act = body?.act || null;
 	if( act ) {
@@ -18,16 +34,21 @@ let api = function( req, res, cb ) {
 			// get msg
 			let msg = body?.msg || null; 
 			L.I( msg );
+			okay();
 		}
 
-		res.end();
+		if( act == "calls" ) {
+			// get msg
+			okay( calls );
+		}
+
+		fail({error: `${act} is not a valid option`});
 		return;
 	} else {
-		L.E( "called api without an act ");
+		fail({error: `no act`});
 		return;
 	}
 
-	res.end();
 }
 
 module.exports = api;

@@ -5,6 +5,11 @@ let rpc = function( req, res, cb ) {
 
 	// do rpc call 
 	// TODO get act from body
+	// jh - better:
+	//		if req.url.startsWith("/api/") 
+	//			mod_load( "./api/" )(req, res, ...)
+	//		else 
+	//			send from static.
 	let act = null;
 	if( act ) {
 		L.V( act );

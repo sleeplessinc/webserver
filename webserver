@@ -40,13 +40,14 @@ if( act == "create" ) {
 			exec(`cp -r template/* ${PATH}; cd ${PATH}; npm i;`, err => {
 				if( err ) { L.E( err ); return; }
 				L.I(`webserver run 3000 ${old_path}`);
+				process.exit(0);
 			});
 		})
-		process.exit(0);
+	} else {
+		console.error( `${PATH} already exists. Exiting...`);
+		process.exit(-1);
 	}
 
-	console.error( `${PATH} already exists. Exiting...`);
-	process.exit(-1);
 }
 
 if( act == "run" ) {

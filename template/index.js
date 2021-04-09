@@ -1,3 +1,4 @@
+delete require.cache[module.filename];	// force module reload on every request
 'use strict'
 
 const L = require( "log5" ).mkLog( "router: " )( 5 );
@@ -8,9 +9,7 @@ let router = function( req, res, cb ) {
 		let mod = mod_load( __dirname + "/api" );
 		if( mod ) {
 			L.D("api module loaded ");
-		   	mod( req, res, (r1, r2) => {
-				if( r1 && r2 ) { cb(r1, r2); }
-			});
+		   	mod( req, res, (r1, r2) => { cb( r1, r2 ); });
 		} else {
 			L.I("mod not found");
 		}

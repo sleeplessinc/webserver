@@ -62,8 +62,15 @@ if( act == "run" ) {
 	var send = require('send')
 	
 	var server = http.createServer(function onRequest (req, res ) {
-		L.D( req.method + " " + req.url );
-		dispatch( PATH, req, res )
+		let data = '';
+		req.on('data', chunk => {
+			data += chunk;
+		})
+		req.on('end', () => {
+			L.D( req.method + " " + req.url );
+			req.body = data;
+			dispatch( PATH, req, res )
+		})
 	});
 	
 	if( WATCH ) {
@@ -99,7 +106,7 @@ if( act == "run" ) {
 	}
 
 	// Tries to load path (must be a dir) as an NPM module. Returns the module or null.
-	let mod_load = function( path, n ) {
+	globalThis.mod_load = function( path, n ) {
 		let mod = null;
 		const p = require("path");
 		try {

@@ -29,16 +29,15 @@ if( act == "create" ) {
 	let PATH = argv[3];
 	let old_path = PATH;
 	// use local path or absolute path
-	if( PATH && ! path.isAbsolute(PATH) ) { PATH = path.join(__dirname, PATH); }
+	PATH = path.resolve( PATH );
 
 	if( !fs.existsSync(PATH) ) {
 		fs.mkdir( PATH, { recursive: true }, ( err, p ) => {
-			if( err ) { return console.error( err ); }
+			if( err ) { return L.E( err ); }
 			L.I( `made directory ${p}` );
 			// To copy a folder or file  
-			if( PATH[ PATH.length - 1 ] != "/" )  { PATH += "/"; }
-			exec(`cp -r template/* ${PATH}; cd ${PATH}; npm i;`, err => {
-				if( err ) { L.E( err ); return; }
+			exec(`cp -r ${__dirname}/template/* ${PATH}; cd ${PATH}; npm i;`, err => {
+				if( err ) { L.E( err ); process.exit(-1); }
 				L.I(`webserver run 3000 ${old_path}`);
 				process.exit(0);
 			});
@@ -60,6 +59,10 @@ if( act == "run" ) {
 	var http = require('http')
 	var parseUrl = require('parseurl')
 	var send = require('send')
+
+	let path = require("path");
+	let { spawn, exec } = require("child_process");
+	let p = path.resolve(PATH);
 	
 	var server = http.createServer(function onRequest (req, res ) {
 		let data = '';
@@ -69,25 +72,25 @@ if( act == "run" ) {
 		req.on('end', () => {
 			L.D( req.method + " " + req.url );
 			req.body = data;
-			dispatch( PATH, req, res )
+			dispatch( p, req, res )
 		})
 	});
 	
-	if( WATCH ) {
-		let path = require("path");
-		let { spawn, exec } = require("child_process");
-		let p = path.isAbsolute(PATH) ? `${PATH}` : `./${PATH}`;
+	// sandbox app
+	exec(`cd ${p};`, err => {
+		if( err ) { L.E( err ); return; }
 
-		// sandbox watch
-		exec(`cd ${p}; chmod +x ${p}watch; ./watch &`, err => {
-			if( err ) { L.E( err ); return; }
+		if( WATCH ) {
+			// sandbox watch
+			exec(`chmod +x ./watch; ./watch &`, err => {
+				if( err ) { L.E( err ); return; }
+			});
+		}
+		server.listen( PORT, function() { 
+			L.I( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
+			L.I( "Listening on port " + PORT + ", serving from directory \"" + p + "\"");
 		});
-
-	}
-	server.listen( PORT, function() { 
-		L.I( "Copyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
-		L.I( "Listening on port " + PORT + ", serving from directory \"" + PATH + "\"");
-	});
+	})
 
 	const serve_static = require("serve-static");
 

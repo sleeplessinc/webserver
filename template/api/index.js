@@ -20,14 +20,14 @@ let api = function( req, res, cb ) {
 			L.I( msg );
 		}
 
-		cb( req, res );
+		res.end();
 		return;
 	} else {
 		L.E( "called api without an act ");
 		return;
 	}
 
-	cb( req, res );
+	res.end();
 }
 
 module.exports = api;

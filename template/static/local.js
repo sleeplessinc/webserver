@@ -3,6 +3,7 @@
 function server_log( txt ) { rpc({ act: "log", msg: txt }); }
 
 document.addEventListener( "DOMContentLoaded", dcl => {
+	sleepless.globalize();
 	server_log("ping")
 	checkReload();
 	document.querySelector( "#okay" ).addEventListener( "click", e => {
@@ -37,6 +38,5 @@ function rpc( o = { act: "log", msg: "empty request"}, cb ) {
     };
     client.open("POST", "/api", true);
     client.setRequestHeader("Content-Type", "application/json");
-	// TODO replace with j2o
-    client.send(JSON.stringify(o));
+    client.send(j2o(o));
 }

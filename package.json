@@ -34,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/sleeplessinc/webserver/issues"
   },
-  "homepage": "https://github.com/sleeplessinc/webserver#readme"
+  "homepage": "https://github.com/sleeplessinc/webserver#readme",
+  "devDependencies": {
+    "eslint": "^7.23.0"
+  }
 }

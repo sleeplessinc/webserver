@@ -20,7 +20,7 @@ if( argv.length < 3 ) {
 
 let act = argv[ 2 ] || null;
 
-if( ! act ) return;
+if( ! act ) { process.exit(-1); }
 
 if( act == "create" ) {
 	const fs = require( "fs" );
@@ -42,11 +42,11 @@ if( act == "create" ) {
 				L.I(`webserver run 3000 ${old_path}`);
 			});
 		})
-		return;
+		process.exit(0);
 	}
 
 	console.error( `${PATH} already exists. Exiting...`);
-	return;
+	process.exit(-1);
 }
 
 if( act == "run" ) {

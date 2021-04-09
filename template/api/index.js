@@ -7,23 +7,21 @@ const L = require( "log5" ).mkLog( "api: " )( 5 );
 
 let api = function( req, res ) {
 
-	let calls = ["log", "db", "do_something"];
+	let calls = ["log", "calls"];
 
-	let body = req?.body || {};
+	let body = req.body || {};
 	body = j2o(body);
 
 	let okay = function( data = "" ) {
+		L.I(o2j(data));
 		res.writeHead(200, { 'Content-Type': 'application/json' });
-    	res.write(j2o(data));
-		L.I(data);
-		res.end();
+    	res.end(o2j(data));
 	}
 
 	let fail = function( data = "" ) {
+		L.E(o2j(data));
 		res.writeHead(500, { 'Content-Type': 'application/json' });
-		res.write(o2j(data));
-		L.E(data);
-		res.end();
+		res.end(o2j(data));
 	}
 
 	let act = body?.act || null;
@@ -35,11 +33,13 @@ let api = function( req, res ) {
 			let msg = body?.msg || null; 
 			L.I( msg );
 			okay();
+			return;
 		}
 
 		if( act == "calls" ) {
 			// get msg
 			okay( calls );
+			return;
 		}
 
 		fail({error: `${act} is not a valid option`});

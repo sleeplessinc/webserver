@@ -6,7 +6,9 @@ document.addEventListener( "DOMContentLoaded", dcl => {
 	sleepless.globalize();
 	let c = rplc8("#calls");
 
-	server_log("ping")
+	server_log("ping", res => {
+		console.log( "res:", res );
+	})
 	checkReload();
 	document.querySelector( "#okay" ).addEventListener( "click", e => {
 		let ok = confirm("Okay?");
@@ -36,14 +38,13 @@ function checkReload( cb ) {
 }
 
 function rpc( o = { act: "log", msg: "empty request"}, cb ) {
+	o = o2j(o);
     var client = new XMLHttpRequest();
     client.onreadystatechange = function() {
-		if( this.status == 200 && this.readyState == 4 ) {
-			if( ! cb ) { console.error( this ); return; }
-			cb( this?.responseText || null );
-		}
+		if( ! cb ) { return; }
+		cb( j2o(this.responseText) );
     };
     client.open("POST", "/api", true);
     client.setRequestHeader("Content-Type", "application/json");
-    client.send(j2o(o));
+    client.send(o);
 }

@@ -6,6 +6,11 @@ let router = function( req, res, cb ) {
 	if( req?.url != "/reload.js" ) { L.V( req.url ); }
 
 	if ( req.url.startsWith("/api") ) {
+		let body = req?.body || null;
+		if( ! body ) {
+			cb( req, res );
+			return;
+		}
 		let mod = mod_load( __dirname + "/api" );
 		if( mod ) {
 			L.D("api module loaded ");

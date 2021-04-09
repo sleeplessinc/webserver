@@ -11,5 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "log5": "^2.3.0"
+  },
+  "dependencies": {
+    "sleepless": "^3.9.0"
   }
 }

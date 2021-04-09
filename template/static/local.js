@@ -4,7 +4,8 @@ function server_log( txt ) { rpc({ act: "log", msg: txt }); }
 
 document.addEventListener( "DOMContentLoaded", dcl => {
 	sleepless.globalize();
-	let c = rplc8("#calls");
+	let s = rplc8("#sleep");
+	s.update( Object.keys(sleepless).map( sa => { return { key: sa } }));
 
 	server_log("ping", res => {
 		console.log( "res:", res );
@@ -15,10 +16,12 @@ document.addEventListener( "DOMContentLoaded", dcl => {
 		if( ok ) alert("Okay. Okay. Okay.");
 	});
 
+	let c = rplc8("#calls");
 	rpc({ act: "calls" }, calls => {
 		if( ! calls ) { return; }
 		c.update(calls.map(ca => { return { key: ca }}));
 	})
+
 });
 
 let old_reload = null, reload_script = null;

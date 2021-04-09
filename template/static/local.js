@@ -35,7 +35,7 @@ function rpc( o = { act: "log", msg: "empty request"}, cb ) {
 			cb( this?.responseText || null );
 		}
     };
-    client.open("GET", "/", true);
+    client.open("GET", "/api", true);
     client.setRequestHeader("Content-Type", "application/json");
 	// TODO replace with j2o
     client.send(JSON.stringify(o));

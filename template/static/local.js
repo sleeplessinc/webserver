@@ -21,7 +21,6 @@ document.addEventListener( "DOMContentLoaded", dcl => {
 		if( ! calls ) { return; }
 		c.update(calls.map(ca => { return { key: ca }}));
 	})
-
 });
 
 let old_reload = null, reload_script = null;

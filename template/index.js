@@ -1,11 +1,18 @@
+'use strict'
 const L = require( "log5" ).mkLog( "rpc: " )( 5 );
 let rpc = function( req, res, cb ) {
-	L.V( req.url );
+	if( req?.url != "/reload.js" ) { L.V( req.url ); }
 
 	// do rpc call 
+	// TODO get act from body
 	let act = null;
 	if( act ) {
-		L.I( act );
+		L.V( act );
+
+		if( act == "log" ) {
+			// get msg
+			L.I("logging message");
+		}
 		cb();
 	}
 

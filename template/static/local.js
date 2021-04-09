@@ -1,4 +1,9 @@
+'use strict';
+
+function server_log( txt ) { rpc({ act: "log", msg: txt }); }
+
 document.addEventListener( "DOMContentLoaded", dcl => {
+	server_log("ping")
 	checkReload();
 	document.querySelector( "#okay" ).addEventListener( "click", e => {
 		let ok = confirm("Okay?");
@@ -20,4 +25,18 @@ function checkReload( cb ) {
 			old_reload = globalThis.needs_reload;
 		});
 	}, 1000);
+}
+
+function rpc( o = { act: "log", msg: "empty request"}, cb ) {
+    var client = new XMLHttpRequest();
+    client.onreadystatechange = function() {
+		if( this.status == 200 && this.readyState == 4 ) {
+			if( ! cb ) return;
+			cb( this?.responseText || null );
+		}
+    };
+    client.open("GET", "/", true);
+    client.setRequestHeader("Content-Type", "application/json");
+	// TODO replace with j2o
+    client.send(JSON.stringify(o));
 }

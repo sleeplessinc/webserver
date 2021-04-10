@@ -13,6 +13,7 @@
     "log5": "^2.3.0"
   },
   "dependencies": {
+    "colors": "^1.4.0",
     "sleepless": "^3.9.0"
   }
 }

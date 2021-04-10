@@ -4,6 +4,7 @@
   "description": "An HTTP Server",
   "main": "webserver.js",
   "dependencies": {
+    "colors": "^1.4.0",
     "ds": "^1.4.2",
     "express": "^4.17.1",
     "greenlock-express": "^4.0.3",

@@ -4,6 +4,7 @@ delete require.cache[module.filename];	// force module reload on every request
 require('sleepless').globalize();
 
 const L = require( "log5" ).mkLog( "api: " )( 5 );
+const colors = require( "colors" );
 
 let api = function( req, res ) {
 
@@ -12,40 +13,38 @@ let api = function( req, res ) {
 	let body = req.body || {};
 	body = j2o(body);
 
-	let okay = function( data = "" ) {
-		L.I(o2j(data));
+	let okay = function( act = "", data = "" ) {
+		L.I(`\t${act.magenta} ↪️  ${o2j(data)}`);
 		res.writeHead(200, { 'Content-Type': 'application/json' });
     	res.end(o2j(data));
 	}
 
-	let fail = function( data = "" ) {
-		L.E(o2j(data));
+	let fail = function( act = "", data = "" ) {
+		L.E(`\t${act.magenta} ❌  ${o2j(data)}`.red);
 		res.writeHead(500, { 'Content-Type': 'application/json' });
 		res.end(o2j(data));
 	}
 
 	let act = body?.act || null;
 	if( act ) {
-		L.W( act );
 
 		if( act == "log" ) {
 			// get msg
 			let msg = body?.msg || null; 
-			L.I( msg );
-			okay();
+			okay( act, msg );
 			return;
 		}
 
 		if( act == "calls" ) {
 			// get msg
-			okay( calls );
+			okay( act, calls );
 			return;
 		}
 
-		fail({error: `${act} is not a valid option`});
+		fail( act, {error: `${act} is not a valid option`});
 		return;
 	} else {
-		fail({error: `no act`});
+		fail( "no act", {error: `no act`});
 		return;
 	}
 

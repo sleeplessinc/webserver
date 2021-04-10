@@ -3,7 +3,7 @@ delete require.cache[module.filename];	// force module reload on every request
 
 require('sleepless').globalize();
 
-const L = require( "log5" ).mkLog( "api: " )( 5 );
+const L = require( "log5" ).mkLog( "api: " )( 3 );
 const colors = require( "colors" );
 
 let api = function( req, res ) {
@@ -14,13 +14,13 @@ let api = function( req, res ) {
 	body = j2o(body);
 
 	let okay = function( act = "", data = "" ) {
-		L.I(`\t${act.magenta} ↪️  ${o2j(data)}`);
+		L.I(`\t${act} ▷ ${o2j(data)}`);
 		res.writeHead(200, { 'Content-Type': 'application/json' });
     	res.end(o2j(data));
 	}
 
 	let fail = function( act = "", data = "" ) {
-		L.E(`\t${act.magenta} ❌  ${o2j(data)}`.red);
+		L.E(`\t${act} ⧮ ${o2j(data)}`.red);
 		res.writeHead(500, { 'Content-Type': 'application/json' });
 		res.end(o2j(data));
 	}

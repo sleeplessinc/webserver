@@ -7,7 +7,6 @@
 // sleepless.com
 
 const L = require( "log5" ).mkLog( "webserver: " )( 4 );
-const colors = require("colors");
 
 const argv = process.argv;
 if( argv.length < 3 ) {
@@ -35,13 +34,13 @@ if( act == "create" ) {
 			// To copy a folder or file  
 			exec(`cp -r ${__dirname}/template/* ${PATH}; cd ${PATH}; npm i;`, err => {
 				if( err ) { L.E( err ); process.exit(-1); }
-				L.I( `project created ${p}`.green );
-				L.I( `To run your project: webserver run 3000 ${old_path} true`.cyan );
+				L.I( `project created ${p}`);
+				L.I( `To run your project: webserver run 3000 ${old_path} true`);
 				process.exit(0);
 			});
 		})
 	} else {
-		console.error( `${PATH} already exists. Exiting...`.red );
+		console.error( `${PATH} already exists. Exiting...`);
 		process.exit(-1);
 	}
 
@@ -68,7 +67,7 @@ if( act == "run" ) {
 			data += chunk;
 		})
 		req.on('end', () => {
-			L.D( ("\t" + req.method + " " + req.url).bgMagenta );
+			L.D( "\t" + req.method + " " + req.url );
 			req.body = data;
 			dispatch( p, req, res )
 		})
@@ -85,8 +84,8 @@ if( act == "run" ) {
 			});
 		}
 		server.listen( PORT, function() { 
-			L.I( ("\tCopyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com").bold );
-			L.I( ("\tListening on port " + PORT + ", serving from directory \"" + p + "\"").green);
+			L.E( "\tCopyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
+			L.W( "\tListening on port " + PORT + ", serving from directory \"" + p + "\"");
 		});
 	})
 
@@ -95,7 +94,7 @@ if( act == "run" ) {
 	let dispatch = function( root, req, res ) {
 		let mod = mod_load( root );
 		if( mod ) { 
-			L.D(("root module loaded "+root).bgMagenta);
+			L.D( "\troot module loaded "+root );
 		   	mod( req, res, (r1, r2) => {
 				if( r1 && r2 ) {
 					send(r1, parseUrl(r1).pathname, { root: root }).pipe(r2);
@@ -114,13 +113,13 @@ if( act == "run" ) {
 			// use local path or absolute path
 			if( path && ! p.isAbsolute(path) ) { path = p.join(__dirname, path); }
 			mod = require( path );
-			L.D( ("mod loaded: " +  path).bgMagenta );
+			L.D( "\tmod loaded: " +  path );
 		} catch( err ) {
 			// If this e.code is present, it means the module just couldn't be loaded for some reason.
 			// But it seems not to be there if the module loaded but got a syntax error or something,
 			// which I DO want to see, so I differentiate between those two cases here.
 			if( err.code == "MODULE_NOT_FOUND") {
-				L.D( ("module not found: " + path).bgRed );
+				L.E( "\tmodule not found: " + path );
 				// L.W(err.stack);	
 			}
 			else {

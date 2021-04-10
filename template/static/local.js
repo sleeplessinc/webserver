@@ -21,6 +21,8 @@ document.addEventListener( "DOMContentLoaded", dcl => {
 		if( ! calls ) { return; }
 		c.update(calls.map(ca => { return { key: ca }}));
 	})
+
+	rpc({act:"dummy"});
 });
 
 let old_reload = null, reload_script = null;

@@ -8,16 +8,41 @@
 
 const L = require( "log5" ).mkLog( "webserver: " )( 4 );
 
-const argv = process.argv;
-if( argv.length < 3 ) {
+const usage = function() {
 	L.E( "Usage: webserver create project_name" );
-	L.E( "Usage: webserver run port dir watch_files(true/false)" );
+	L.E( "Usage: webserver [run] port [dir] [ watch_files(true/false) ]" );
 	process.exit( 1 );
 }
 
-let act = argv[ 2 ] || null;
+const argv = process.argv;
+// all possible valid arg options:
+// 		"node", "webserver", "create", "path"
+// 		"node", "webserver", "run", 12345,
+// 		"node", "webserver", "run", 12345, "path"
+// 		"node", "webserver", "run", 12345, "path", "watch"
+// 		"node", "webserver", 12345
+// 		"node", "webserver", 12345, "path"
+// 		"node", "webserver", 12345, "path", "watch"
+if( argv.length < 3 ) {
+	usage();
+}
 
-if( ! act ) { process.exit(-1); }
+if( ( argv[ 2 ] | 0 ) != 0 ) {
+	// first arg looks like a number, so assume it's a port number and that they want
+	// the old behavior, like "webserver 12345 [ path ]"
+
+	argv.splice( 2, 0, "run" );	// inject "run" as first arg
+
+	if( argv.length <= 4 ) {
+		argv.push( "." );		// no root dir given, so default to cwd
+	}
+}
+
+
+let act = argv[ 2 ] || null;
+if( ! act ) {
+	usage();
+}
 
 if( act == "create" ) {
 	const fs = require( "fs" );
@@ -43,10 +68,7 @@ if( act == "create" ) {
 		console.error( `${PATH} already exists. Exiting...`);
 		process.exit(-1);
 	}
-
-}
-
-if( act == "run" ) {
+} else if( act == "run" ) {
 	let PORT = argv[3] || 12345;
 	let PATH = argv[4] || "./";
 	if( PATH[ PATH.length - 1 ] != "/" )  { PATH += "/"; }
@@ -74,18 +96,22 @@ if( act == "run" ) {
 	});
 	
 	// sandbox app
+// XXX use process.chdir here
 	exec(`cd ${p};`, err => {
 		if( err ) { L.E( err ); return; }
 
 		if( WATCH ) {
 			// sandbox watch
+// XXX you need to use spawn() here, not exec()
+//		with the "&" it disassociates the watch process from this one, so it just
+// 		leaves a "watch" running in the background for ever, every time you run webserver.
 			exec(`chmod +x ./watch; ./watch &`, err => {
 				if( err ) { L.E( err ); return; }
 			});
 		}
 		server.listen( PORT, function() { 
-			L.E( "\tCopyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
-			L.W( "\tListening on port " + PORT + ", serving from directory \"" + p + "\"");
+			L.I( "\tCopyright " + (new Date() . getFullYear()) + " Sleepless Software Inc.  All Rights Reserved - sleepless.com" );
+			L.I( "\tListening on port " + PORT + ", serving from directory \"" + p + "\"");
 		});
 	})
 
@@ -130,4 +156,8 @@ if( act == "run" ) {
 
 		return mod;
 	}
+} else {
+	usage();
 }
+
+

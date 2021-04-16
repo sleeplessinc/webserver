@@ -100,12 +100,6 @@ if( act == "create" ) {
 	process.chdir( p );
 	if( WATCH ) {
 		// sandbox watch
-		// XXX you need to use spawn() here, not exec()
-		//		with the "&" it disassociates the watch process from this one, so it just
-		// 		leaves a "watch" running in the background for ever, every time you run webserver.
-		//exec(`chmod +x ./watch; ./watch &`, err => {
-		//	if( err ) { L.E( err ); return; }
-		//});
 		exec( "chmod +x ./watch", err => {
 			if( err )
 				L.W( "Unable to watch." );

@@ -3,7 +3,7 @@
 
 Copyright 2020 Sleepless Software Inc.  All Rights Reserved.
 
-A simple web server with cold reloading
+A simple web server with auto reloading
 
 ## Install
 

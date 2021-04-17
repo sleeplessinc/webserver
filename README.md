@@ -12,19 +12,22 @@ A simple web server with cold reloading
 
 ## Usage 
 
-	webserver create myapp
+Create an app dir:
 
-	webserver run 3000 myapp
+	webserver create path/to/myapp
 
-or to cold reload:
+Run the app:
 
-	webserver run 3000 myapp true
+	webserver run 3000 path/to/myapp
+
+To auto reload when files change (your app has to support this)
+
+	webserver run 3000 path/to/myapp true
 
 
-Legacy Usage
+## Legacy Usage
 
-You can still use webserver to simply serve up
-static files this way:
+You can still use to simply serve up static files this way:
 
 	webserver port dir
 

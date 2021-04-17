@@ -3,6 +3,10 @@
   "version": "5.0.0",
   "description": "An HTTP Server",
   "main": "webserver.js",
+  "bin": {
+    "webserver": "webserver",
+    "ws": "webserver"
+  },
   "dependencies": {
     "ds": "^1.4.2",
     "express": "^4.17.1",

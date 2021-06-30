@@ -29,6 +29,7 @@ const ADMIN_EMAIL = argv[ 5 ].trim()
 const acme_cfg = {
 	version: "draft-11",
 	server: "https://acme-v02.api.letsencrypt.org/directory",
+	//server: "https://acme-staging-v02.api.letsencrypt.org/directory",
 	//packageRoot: __dirname,
 	configDir: "./acme/",
 	email: ADMIN_EMAIL,
@@ -74,7 +75,6 @@ function listening() {
 
 if( DOMAINS.length == 0 ) {
 	L.I( "Development mode" );
-	acme_cfg.server = "https://acme-staging-v02.api.letsencrypt.org/directory";
 	/*
 	const simpleCert = require('node-simple-cert')
 	const key_cert = await simpleCert({
@@ -88,7 +88,7 @@ if( DOMAINS.length == 0 ) {
 
 	require( "https" ).createServer( key_cert, app ).listen( PORT, listening );
 	*/
-	//webd = app.listen( PORT, listening );
+	webd = app.listen( PORT, listening );
 
 } else {
 	L.I( "Production mode" );
@@ -105,13 +105,13 @@ if( DOMAINS.length == 0 ) {
 
 	require( "https" ).createServer( key_cert, app ).listen( PORT, listening );
 	*/
+	acme_cfg.approveDomains = function(opts, certs, cb) {
+		cb( null, { options: opts, certs: certs } );
+	};
+	acme_cfg.app = app;
+	webd = require('greenlock-express').create( acme_cfg ).listen( 80, 443 );
+	webd.on( "listening", listening );
 }
-acme_cfg.approveDomains = function(opts, certs, cb) {
-	cb( null, { options: opts, certs: certs } );
-};
-acme_cfg.app = app;
-webd = require('greenlock-express').create( acme_cfg ).listen( 80, 443 );
-webd.on( "listening", listening );
 
 // --------------------------------------------
 

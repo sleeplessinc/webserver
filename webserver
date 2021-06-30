@@ -1,0 +1,151 @@
+#!/usr/bin/env node
+
+// Copyright 2021
+// Sleepless Software Inc.
+// All Rights Reserved
+// sleepless.com
+
+const path = require('path');
+const fs = require('fs');
+
+const sleepless = require("sleepless");
+const L = log5;
+const rpc = require( "rpc" )
+
+const serve_static = require( "serve-static" )
+
+const argv = process.argv;
+if( argv.length != 4 && argv.length != 6 ) {
+	L.W( "Usage: webserver port root_dir [ domain admin_email ]" );
+	process.exit( 1 );
+}
+const PORT = toInt( argv[ 2 ] );
+const ROOT = path.resolve( argv[ 3 ] ); 
+const DOMAINS = ( argv.length >= 5 ) ? argv[ 4 ].trim().split( "," ) : [];
+const ADMIN_EMAIL = argv[ 5 ].trim()
+
+// -------------------
+
+const acme_cfg = {
+	version: "draft-11",
+	server: "https://acme-v02.api.letsencrypt.org/directory",
+	//packageRoot: __dirname,
+	configDir: "./acme/",
+	email: ADMIN_EMAIL,
+	//cluster: false,
+	agreeTos: true,
+}
+acme_cfg.store = require('greenlock-store-fs');
+acme_cfg.approveDomains = function( options, certs, cb ) {
+	L.I( "Approving "+options.domains );
+	cb( null, { options, certs } );
+};
+
+// -------------------
+// -------------------
+
+const OPTS = { cors: false, dev: true };
+const app = rpc( "/api/", __dirname + "/api/", OPTS );
+app.use( serve_static( __dirname + "/static" ) );
+
+
+// -------------------
+// -------------------
+
+
+/*
+app.all( "*", ( req, res, next ) => {
+	let mod = require( "./server.js" );
+	mod( req, res, next );
+});
+*/
+
+
+let webd = null;
+
+function listening() {
+	if( webd.type ) 
+		L.I( "Type: " + webd.type )
+	L.I( "Serving from " + ROOT );
+	L.I( "Listening on " + PORT ); //+ " " + o2j( webd.address() ));
+}
+
+
+
+if( DOMAINS.length == 0 ) {
+	L.I( "Development mode" );
+	acme_cfg.server = "https://acme-staging-v02.api.letsencrypt.org/directory";
+	/*
+	const simpleCert = require('node-simple-cert')
+	const key_cert = await simpleCert({
+		dataDir: "./cfg",
+		commonName: DOMAINS[ 0 ],
+		email: ADMIN_EMAIL,
+		production: false,
+		serverHost: 'localhost',
+		serverPort: '80',  // you must proxy this to port 80
+	})
+
+	require( "https" ).createServer( key_cert, app ).listen( PORT, listening );
+	*/
+	//webd = app.listen( PORT, listening );
+
+} else {
+	L.I( "Production mode" );
+	/*	
+	const simpleCert = require('node-simple-cert')
+	const key_cert = await simpleCert({
+		dataDir: "./cfg",
+		commonName: DOMAINS[ 0 ],
+		email: ADMIN_EMAIL,
+		production: true,
+		serverHost: 'localhost',
+		serverPort: '80',  // you must proxy this to port 80
+	})
+
+	require( "https" ).createServer( key_cert, app ).listen( PORT, listening );
+	*/
+}
+acme_cfg.approveDomains = function(opts, certs, cb) {
+	cb( null, { options: opts, certs: certs } );
+};
+acme_cfg.app = app;
+webd = require('greenlock-express').create( acme_cfg ).listen( 80, 443 );
+webd.on( "listening", listening );
+
+// --------------------------------------------
+
+
+// websockets stuff
+/*
+
+let seq = 829497;
+
+const room = "sleepless";
+const options = { };
+//const io = socketio( 12346, options );
+const io = socketio( webd );
+
+io.on( "connection", socket => {
+
+	let id = socket.client.id;
+	seq += 1;
+	let name = "Visitor-" + seq;
+	L.I( "CONNECT: " + name + " id=" + id );
+
+	socket.join( room );
+
+	//io.to( room ).emit( "message", { type: "chat", from: "system", text: name + " has arrived." } );
+
+	socket.emit( "message", { type: "welcome", name: name } );
+	socket.emit( "message", { type: "chat", from: "system", text: "Welcome!" } );
+	socket.emit( "message", { type: "chat", from: "system", text: "Your name is \"" + name + "\"" } );
+
+	socket.on( "message", msg => {
+		L.I("CHAT: " + name + ": " + msg);
+		io.to( room ).emit( "message", { type: "chat", from: name, text: msg } );
+	});
+
+});
+
+*/

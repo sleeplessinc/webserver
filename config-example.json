@@ -1,0 +1,9 @@
+{
+	"version": "draft-11",
+	"server": "https://acme-v02.api.letsencrypt.org/directory",
+	"configDir": "./acme/",
+	"email":"foo@bar.com", 
+	"debug": false,
+	"domainsDir": "./domains",
+	"logLevel": 3
+}

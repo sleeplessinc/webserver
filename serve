@@ -8,14 +8,24 @@ const { log5, toInt, o2j, } = require( "sleepless" );
 
 const L = log5;
 
-const root = process.argv[ 2 ];
 
-const port = toInt( process.argv[ 3 ] );
+const argv = process.argv; 
 
-const ll = toInt( process.argv[ 4 ] );
-if( ll > 0 ) {
-    L( ll ).V( "Verbosity level: "+ll );
+const usage = function() {
+    console.log( "Usage: "+argv[ 0 ]+" "+argv[ 1 ]+" root_dir [ port [ log_level ] ]" );
+    process.exit( 1 );
 }
+
+const root = argv[ 2 ];
+
+if( ! root ) {
+    usage();
+}
+
+const port = toInt( argv[ 3 ] ) || 80;
+
+const ll = toInt( argv[ 4 ] ) || 3;
+L( ll ).V( "Verbosity level: "+ll );
 
 http.createServer( ( req, res ) => {
     const handler = require( __dirname+"/basic.js" ).create( { root } );

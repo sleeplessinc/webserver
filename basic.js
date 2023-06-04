@@ -36,7 +36,8 @@ exports.create = function( opts ) {
         let { method, url, query, body } = req;
 
         // if not an rpc request, pass on to static
-        if( url != "/rpc" && url != "/rpc/" ) {
+        const path = url.split( "?" ).shift();
+        if( path != "/rpc" && path != "/rpc/" ) {
             next();
             return
         }
@@ -64,7 +65,8 @@ exports.create = function( opts ) {
 
         try {
 
-            const mod = require( root + "/rpc/" );
+            const p = require("path").resolve( root + "/rpc" );
+            const mod = require( p );
             mod( input, data => {
                 if( dbg ) log( "<<<=========== RPC OKAY "+o2j(data));
                 okay( data );

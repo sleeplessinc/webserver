@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+// Copyright 2021 Sleepless Software Inc. All Rights Reserved
+
+const http = require( "http" );
+
+const { log5, toInt, o2j, } = require( "sleepless" );
+
+const L = log5;
+
+const root = process.argv[ 2 ];
+
+const port = toInt( process.argv[ 3 ] );
+
+const ll = toInt( process.argv[ 4 ] );
+if( ll > 0 ) {
+    L( ll ).V( "Verbosity level: "+ll );
+}
+
+http.createServer( ( req, res ) => {
+    const handler = require( __dirname+"/basic.js" ).create( { root } );
+    handler( req, res );
+} ).listen( port, () => {
+    L.I( "Listening on "+port+" & serving from "+o2j( process.cwd() ) );
+})
+
